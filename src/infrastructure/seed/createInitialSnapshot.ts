@@ -129,7 +129,7 @@ export function createInitialSnapshot(): AppSnapshot {
     ],
     transactions: [],
     settings: {
-      theme: 'system',
+      theme: 'light',
       locale: 'pt-BR',
       currency: 'BRL',
       financialMonthStartDay: 1,

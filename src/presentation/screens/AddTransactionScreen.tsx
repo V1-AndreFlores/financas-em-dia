@@ -9,7 +9,12 @@ import type {
   TransactionType,
 } from '../../domain/entities/Transaction';
 import { transactionsAdded } from '../../features/transactions/transactionsSlice';
-import { brDateToIso, isoDateToBr, todayIsoDate } from '../../shared/utils/date';
+import {
+  brDateToIso,
+  getBrDateValidationError,
+  isoDateToBr,
+  todayIsoDate,
+} from '../../shared/utils/date';
 import {
   createInstallmentTransactions,
   createRecurringTransactions,
@@ -21,6 +26,7 @@ import { AppDialog } from '../components/AppDialog';
 import { AppHeader } from '../components/AppHeader';
 import { AppScreen } from '../components/AppScreen';
 import { AppText } from '../components/AppText';
+import { DateInput } from '../components/DateInput';
 import { FilterChip } from '../components/FilterChip';
 import { FormTextInput } from '../components/FormTextInput';
 import { MoneyInput } from '../components/MoneyInput';
@@ -95,6 +101,7 @@ export function AddTransactionScreen() {
 
   const save = () => {
     const normalizedDescription = description.trim();
+    const dateValidationError = getBrDateValidationError(date);
     const isoDate = brDateToIso(date);
 
     if (!normalizedDescription) {
@@ -115,10 +122,10 @@ export function AddTransactionScreen() {
       return;
     }
 
-    if (!isoDate) {
+    if (dateValidationError || !isoDate) {
       setFeedbackDialog({
         title: 'Data inválida',
-        message: 'Use o formato dd/MM/aaaa.',
+        message: dateValidationError ?? 'Informe uma data válida.',
         actionTitle: 'Corrigir',
       });
       return;
@@ -259,12 +266,9 @@ export function AddTransactionScreen() {
             onChangeValue={setAmountInCents}
           />
 
-          <FormTextInput
+          <DateInput
             label={entryMode === 'installment' ? 'Data da parcela inicial' : 'Data inicial'}
-            keyboardType="numeric"
-            maxLength={10}
             onChangeText={setDate}
-            placeholder="dd/MM/aaaa"
             value={date}
           />
 

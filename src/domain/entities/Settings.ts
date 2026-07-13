@@ -1,4 +1,4 @@
-export type ThemePreference = 'system' | 'light' | 'dark';
+export type ThemePreference = 'light' | 'dark';
 export type AppLockMode = 'none' | 'biometric' | 'pin';
 
 export interface AppSettings {

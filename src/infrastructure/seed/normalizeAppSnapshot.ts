@@ -18,7 +18,7 @@ function isRecord(value: unknown): value is UnknownRecord {
 }
 
 function isThemePreference(value: unknown): value is ThemePreference {
-  return value === 'system' || value === 'light' || value === 'dark';
+  return value === 'light' || value === 'dark';
 }
 
 function isAppLockMode(value: unknown): value is AppLockMode {
@@ -196,9 +196,12 @@ export function normalizeAppSnapshot(snapshot: unknown): AppSnapshot {
       : defaults.categories,
     transactions: normalizeTransactions(snapshot.transactions),
     settings: {
-      theme: isThemePreference(persistedSettings.theme)
-        ? persistedSettings.theme
-        : defaults.settings.theme,
+      theme:
+        persistedSettings.theme === 'system'
+          ? 'light'
+          : isThemePreference(persistedSettings.theme)
+            ? persistedSettings.theme
+            : defaults.settings.theme,
       locale: 'pt-BR',
       currency: 'BRL',
       financialMonthStartDay: normalizeInteger(

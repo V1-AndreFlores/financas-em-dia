@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
 Última atualização: 13/07/2026  
-Versão da referência: 1.1.0
+Versão da referência: 1.1.1
 
 ## 1. Identidade
 
@@ -63,7 +63,8 @@ As telas Início, Lançamentos e Relatórios compartilham o mesmo deslocamento d
 ## 5. Regras financeiras
 
 - Valores são persistidos em centavos.
-- Datas são persistidas em `yyyy-MM-dd` e exibidas em `dd/MM/yyyy`.
+- Datas são persistidas em `yyyy-MM-dd` e exibidas/digitadas em `dd/MM/aaaa`.
+- Todos os campos de data usam máscara automática e validação de data real.
 - Tipos: receita ou despesa.
 - Situações: efetivado ou pendente.
 - O resultado do ciclo considera somente lançamentos efetivados dentro do período.
@@ -216,7 +217,38 @@ O aplicativo bloqueia ao iniciar e quando sai do estado ativo. O bloqueio proteg
 - Cancelar é secundário.
 - Não usar ícones nos botões dos modais.
 
-## 14. Arquivos adicionados na versão 1.1.0
+## 14. Datas e máscara de entrada
+
+Componente reutilizável:
+
+- `src/presentation/components/DateInput.tsx`
+
+Regras:
+
+- aceita somente os oito dígitos de dia, mês e ano;
+- insere `/` automaticamente após dia e mês;
+- valida preenchimento completo;
+- rejeita datas inexistentes pelo calendário;
+- exibe erro inline após perda de foco;
+- executa nova validação obrigatória antes de salvar ou aplicar filtros.
+
+Aplicado em:
+
+- novo lançamento;
+- edição de lançamento;
+- saldo inicial de conta;
+- período personalizado dos filtros avançados.
+
+## 15. Aparência
+
+Preferências válidas:
+
+- `light`
+- `dark`
+
+O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valores antigos `system` são convertidos para `light` durante a normalização.
+
+## 16. Arquivos adicionados na versão 1.1.0
 
 - `src/features/financialPeriod/financialPeriodSlice.ts`
 - `src/infrastructure/notifications/notificationService.native.ts`
@@ -231,7 +263,7 @@ O aplicativo bloqueia ao iniciar e quando sai do estado ativo. O bloqueio proteg
 - `src/presentation/screens/AppLockScreen.tsx`
 - `src/shared/utils/transactionSeries.ts`
 
-## 15. Dependências nativas adicionadas
+## 17. Dependências nativas adicionadas
 
 - `expo-notifications ~57.0.3`
 - `expo-local-authentication ~57.0.0`
@@ -240,7 +272,7 @@ O aplicativo bloqueia ao iniciar e quando sai do estado ativo. O bloqueio proteg
 
 Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas exigem novo build EAS.
 
-## 16. Próximos itens planejados
+## 18. Próximos itens planejados
 
 - Cartões de crédito e faturas.
 - Transferências entre contas.
@@ -249,7 +281,7 @@ Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas 
 - Exportação, backup e restauração.
 - Testes automatizados das regras financeiras.
 
-## 17. Regra permanente de entrega
+## 19. Regra permanente de entrega
 
 1. Trabalhar sobre a versão mais recente.
 2. Preservar funcionalidades existentes.

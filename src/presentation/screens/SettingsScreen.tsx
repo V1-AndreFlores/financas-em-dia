@@ -265,16 +265,10 @@ export function SettingsScreen() {
         <SectionTitle title="Aparência" />
         <AppCard style={styles.sectionCard}>
           <View style={styles.chips}>
-            {(['system', 'light', 'dark'] as ThemePreference[]).map((preference) => (
+            {(['light', 'dark'] as ThemePreference[]).map((preference) => (
               <FilterChip
                 key={preference}
-                label={
-                  preference === 'system'
-                    ? 'Sistema'
-                    : preference === 'light'
-                      ? 'Claro'
-                      : 'Escuro'
-                }
+                label={preference === 'light' ? 'Claro' : 'Escuro'}
                 selected={settings.theme === preference}
                 onPress={() => setTheme(preference)}
               />

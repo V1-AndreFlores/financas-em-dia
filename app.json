@@ -2,7 +2,7 @@
   "expo": {
     "name": "Finanças em Dia",
     "slug": "financas-em-dia",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",

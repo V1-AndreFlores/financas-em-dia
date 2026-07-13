@@ -7,7 +7,7 @@ import type {
 } from '../../domain/entities/Settings';
 
 const initialState: AppSettings = {
-  theme: 'system',
+  theme: 'light',
   locale: 'pt-BR',
   currency: 'BRL',
   financialMonthStartDay: 1,

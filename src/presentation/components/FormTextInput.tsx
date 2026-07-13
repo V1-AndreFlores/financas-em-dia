@@ -3,11 +3,17 @@ import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 import { AppText } from './AppText';
 import { useAppTheme } from '../theme/AppThemeProvider';
 
-interface FormTextInputProps extends TextInputProps {
+export interface FormTextInputProps extends TextInputProps {
   label: string;
+  errorMessage?: string;
 }
 
-export function FormTextInput({ label, style, ...props }: FormTextInputProps) {
+export function FormTextInput({
+  label,
+  errorMessage,
+  style,
+  ...props
+}: FormTextInputProps) {
   const { theme } = useAppTheme();
 
   return (
@@ -23,12 +29,20 @@ export function FormTextInput({ label, style, ...props }: FormTextInputProps) {
           styles.input,
           {
             backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            borderColor: errorMessage ? theme.colors.expense : theme.colors.border,
             color: theme.colors.text,
           },
           style,
         ]}
       />
+      {errorMessage ? (
+        <AppText
+          variant="caption"
+          style={[styles.error, { color: theme.colors.expense }]}
+        >
+          {errorMessage}
+        </AppText>
+      ) : null}
     </View>
   );
 }
@@ -36,6 +50,9 @@ export function FormTextInput({ label, style, ...props }: FormTextInputProps) {
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
+  },
+  error: {
+    marginTop: 6,
   },
   input: {
     borderRadius: 12,

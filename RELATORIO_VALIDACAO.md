@@ -1,18 +1,17 @@
-# Relatório de Validação — Finanças em Dia 1.1.0
+# Relatório de Validação — Finanças em Dia 1.1.1
 
 Data: 13/07/2026
 
 ## Escopo validado
 
-- Edição de lançamentos.
-- Navegação compartilhada entre ciclos.
-- Filtros avançados.
-- Cadastro e edição de saldo inicial por conta.
-- Lançamentos recorrentes com ocorrências editáveis.
-- Parcelamentos iniciados em qualquer parcela.
-- Notificações locais.
-- Bloqueio por biometria ou PIN.
-- Migração do snapshot da versão 1 para a versão 2.
+- Máscara automática de datas no formato `dd/MM/aaaa`.
+- Validação de datas incompletas e datas inexistentes.
+- Aplicação da máscara nos cadastros, edição de lançamentos, saldo inicial e filtros avançados.
+- Remoção da opção de tema “Sistema”.
+- Tema claro como padrão para novas instalações.
+- Persistência das opções Claro e Escuro.
+- Migração de ajustes antigos com tema “Sistema” para Claro.
+- Preservação das funcionalidades da versão 1.1.0.
 
 ## Resultados
 
@@ -20,21 +19,22 @@ Data: 13/07/2026
 - Bundle Web: aprovado.
 - Bundle Android: aprovado.
 - Bundle iOS: aprovado.
-- Resolução por plataforma dos serviços de notificação e segurança: aprovada nos bundles.
+- Campos de data localizados no projeto usando o componente reutilizável `DateInput`.
+- Persistência do tema mantida pelo listener Redux existente.
+- Referências ao tema “Sistema” restritas à migração de snapshots antigos.
 - Referências a registro npm interno no `package-lock.json`: zero.
-- Dependências nativas compatíveis com Expo SDK 57: instaladas pelas versões recomendadas do SDK.
+
+## Casos de validação de data
+
+- `20072026` é formatado como `20/07/2026`.
+- `20/07/2026` é aceito.
+- `31/02/2026` é rejeitado.
+- `29/02/2025` é rejeitado.
+- `29/02/2024` é aceito.
+- Datas incompletas exibem orientação para completar `dd/MM/aaaa`.
 
 ## Observações
 
-- Biometria e notificações devem ser testadas em aparelho físico ou development/preview build.
-- Face ID no iOS requer build próprio; não deve ser validado somente pelo Expo Go.
-- A Web suporta PIN por armazenamento local, mas não biometria nesta versão.
-- Notificações são locais e limitadas às 64 despesas pendentes futuras mais próximas.
-- O bloqueio do aplicativo não representa criptografia integral do banco financeiro.
-
-## Diagnóstico adicional
-
-- `expo-doctor`: 18 de 20 verificações concluídas com sucesso.
-- As duas verificações restantes não foram executadas porque o ambiente de validação não conseguiu acessar a API pública da Expo e o React Native Directory (`EAI_AGAIN exp.host`).
-- Auditoria npm: 0 vulnerabilidades altas, 0 críticas e 10 moderadas transitivas do toolchain. Não foi aplicado `npm audit fix --force` para evitar alterações incompatíveis no SDK.
-- Configuração pública do Expo (`expo config --type public`): processada com sucesso, incluindo plugins de notificações, biometria e armazenamento seguro.
+- A validação final continua ocorrendo antes de salvar ou aplicar filtros, mesmo que o usuário não retire o foco do campo.
+- A indicação inline é exibida depois que um campo parcialmente preenchido perde o foco.
+- Não foram adicionadas novas dependências nativas nesta atualização; não é obrigatório gerar novo APK apenas por causa desta alteração, embora um novo build seja necessário para distribuir a versão atualizada.

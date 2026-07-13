@@ -62,6 +62,35 @@ export function brDateToIso(value: string): string | null {
   return toIsoDate(date);
 }
 
+
+export function formatBrDateInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+
+  if (digits.length <= 2) {
+    return digits;
+  }
+
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+export function getBrDateValidationError(value: string): string | null {
+  const normalizedValue = value.trim();
+
+  if (!normalizedValue) {
+    return 'Informe uma data.';
+  }
+
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(normalizedValue)) {
+    return 'Informe a data completa no formato dd/MM/aaaa.';
+  }
+
+  return brDateToIso(normalizedValue) ? null : 'Informe uma data válida.';
+}
+
 export function addDaysToIso(value: string, days: number): string {
   const date = parseIsoDate(value);
 

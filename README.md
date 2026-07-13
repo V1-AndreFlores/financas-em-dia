@@ -1,6 +1,6 @@
 # Finanças em Dia
 
-Versão atual: **1.1.0**
+Versão atual: **1.1.1**
 
 Aplicativo mobile e web, offline-first, para controle financeiro pessoal. Construído com React Native, Expo e TypeScript.
 
@@ -49,9 +49,30 @@ npm run typecheck
 - Saldo consolidado calculado até o final do ciclo selecionado.
 - Lembretes locais para despesas pendentes.
 - Bloqueio por biometria ou PIN.
-- Temas claro, escuro ou conforme o sistema.
+- Tema claro como padrão e tema escuro persistente até nova alteração do usuário.
+- Campos de data com máscara automática `dd/MM/aaaa` e validação de datas reais.
 - Tela de splash com duração mínima de 3 segundos e três pontos animados.
 - Modais próprios e consistentes com a identidade visual do aplicativo.
+
+## Datas
+
+Os campos de data aceitam somente números e inserem as barras automaticamente durante a digitação.
+
+Exemplo:
+
+```text
+20072026 → 20/07/2026
+```
+
+A validação rejeita datas incompletas ou inexistentes, como `31/02/2026`. Internamente, as datas continuam persistidas no formato ISO `yyyy-MM-dd`.
+
+## Aparência
+
+O aplicativo possui somente as opções **Claro** e **Escuro**:
+
+- Claro é o padrão para instalações novas.
+- A escolha é persistida localmente.
+- Dados antigos configurados como “Sistema” são migrados automaticamente para Claro.
 
 ## Recorrências
 
@@ -106,4 +127,4 @@ A aplicação usa uma interface de repositório única:
 - Web: `AsyncStorageAppDataRepository`
 - Android/iOS: `SQLiteAppDataRepository`
 
-O snapshot persistido foi atualizado para a versão 2. Dados da versão anterior são normalizados durante a inicialização.
+O snapshot persistido usa a versão 2. Dados anteriores são normalizados durante a inicialização.

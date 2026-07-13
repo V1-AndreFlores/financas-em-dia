@@ -8,10 +8,15 @@ import type {
   TransactionStatus,
   TransactionType,
 } from '../../domain/entities/Transaction';
-import { brDateToIso, isoDateToBr } from '../../shared/utils/date';
+import {
+  brDateToIso,
+  getBrDateValidationError,
+  isoDateToBr,
+} from '../../shared/utils/date';
 import { AppButton } from './AppButton';
 import { AppModal } from './AppModal';
 import { AppText } from './AppText';
+import { DateInput } from './DateInput';
 import { FilterChip } from './FilterChip';
 import { FormTextInput } from './FormTextInput';
 import { MoneyInput } from './MoneyInput';
@@ -79,6 +84,7 @@ export function TransactionFormModal({
     }
 
     const normalizedDescription = description.trim();
+    const dateValidationError = getBrDateValidationError(date);
     const isoDate = brDateToIso(date);
 
     if (!normalizedDescription) {
@@ -91,8 +97,11 @@ export function TransactionFormModal({
       return;
     }
 
-    if (!isoDate) {
-      onValidationError('Data inválida', 'Use o formato dd/MM/aaaa.');
+    if (dateValidationError || !isoDate) {
+      onValidationError(
+        'Data inválida',
+        dateValidationError ?? 'Informe uma data válida.',
+      );
       return;
     }
 
@@ -175,13 +184,7 @@ export function TransactionFormModal({
           valueInCents={amountInCents}
           onChangeValue={setAmountInCents}
         />
-        <FormTextInput
-          label="Data"
-          keyboardType="numeric"
-          maxLength={10}
-          onChangeText={setDate}
-          value={date}
-        />
+        <DateInput label="Data" onChangeText={setDate} value={date} />
 
         <SectionTitle title="Categoria" />
         <View style={styles.chips}>

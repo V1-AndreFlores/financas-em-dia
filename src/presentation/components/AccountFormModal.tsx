@@ -2,11 +2,17 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import type { Account, AccountType } from '../../domain/entities/Account';
-import { brDateToIso, isoDateToBr, todayIsoDate } from '../../shared/utils/date';
+import {
+  brDateToIso,
+  getBrDateValidationError,
+  isoDateToBr,
+  todayIsoDate,
+} from '../../shared/utils/date';
 import { createId } from '../../shared/utils/createId';
 import { AppButton } from './AppButton';
 import { AppModal } from './AppModal';
 import { AppText } from './AppText';
+import { DateInput } from './DateInput';
 import { FilterChip } from './FilterChip';
 import { FormTextInput } from './FormTextInput';
 import { MoneyInput } from './MoneyInput';
@@ -60,6 +66,7 @@ export function AccountFormModal({
 
   const save = () => {
     const normalizedName = name.trim();
+    const dateValidationError = getBrDateValidationError(initialBalanceDate);
     const isoDate = brDateToIso(initialBalanceDate);
 
     if (!normalizedName) {
@@ -67,8 +74,11 @@ export function AccountFormModal({
       return;
     }
 
-    if (!isoDate) {
-      onValidationError('Data inválida', 'Use o formato dd/MM/aaaa para o saldo inicial.');
+    if (dateValidationError || !isoDate) {
+      onValidationError(
+        'Data inválida',
+        dateValidationError ?? 'Informe uma data válida para o saldo inicial.',
+      );
       return;
     }
 
@@ -135,12 +145,9 @@ export function AccountFormModal({
           valueInCents={initialBalanceInCents}
           onChangeValue={setInitialBalanceInCents}
         />
-        <FormTextInput
+        <DateInput
           label="Data do saldo inicial"
-          keyboardType="numeric"
-          maxLength={10}
           onChangeText={setInitialBalanceDate}
-          placeholder="dd/MM/aaaa"
           value={initialBalanceDate}
         />
 

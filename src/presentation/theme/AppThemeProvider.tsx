@@ -4,7 +4,6 @@ import {
   useMemo,
   type PropsWithChildren,
 } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { useAppSelector } from '../../application/store/hooks';
 import { darkColors, lightColors } from './colors';
@@ -35,11 +34,8 @@ interface AppThemeContextValue {
 const AppThemeContext = createContext<AppThemeContextValue | null>(null);
 
 export function AppThemeProvider({ children }: PropsWithChildren) {
-  const systemMode = useColorScheme();
   const preference = useAppSelector((state) => state.settings.theme);
-
-  const resolvedMode: ResolvedThemeMode =
-    preference === 'system' ? (systemMode === 'dark' ? 'dark' : 'light') : preference;
+  const resolvedMode: ResolvedThemeMode = preference;
 
   const value = useMemo<AppThemeContextValue>(
     () => ({

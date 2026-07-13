@@ -7,11 +7,16 @@ import type {
   TransactionStatus,
   TransactionType,
 } from '../../domain/entities/Transaction';
-import { brDateToIso, isoDateToBr } from '../../shared/utils/date';
+import {
+  brDateToIso,
+  getBrDateValidationError,
+  isoDateToBr,
+} from '../../shared/utils/date';
 import type { FinancialPeriod } from '../../shared/utils/financialPeriod';
 import { AppButton } from './AppButton';
 import { AppModal } from './AppModal';
 import { AppText } from './AppText';
+import { DateInput } from './DateInput';
 import { FilterChip } from './FilterChip';
 import { FormTextInput } from './FormTextInput';
 import { MoneyInput } from './MoneyInput';
@@ -86,13 +91,23 @@ export function TransactionFiltersModal({
     let customEndDate: string | null = null;
 
     if (draft.periodScope === 'custom') {
+      const startDateError = getBrDateValidationError(startDate);
+      const endDateError = getBrDateValidationError(endDate);
       customStartDate = brDateToIso(startDate);
       customEndDate = brDateToIso(endDate);
 
-      if (!customStartDate || !customEndDate || customStartDate > customEndDate) {
+      if (startDateError || endDateError || !customStartDate || !customEndDate) {
         onValidationError(
           'Período inválido',
-          'Informe datas válidas e mantenha a data inicial anterior à data final.',
+          startDateError ?? endDateError ?? 'Informe datas válidas.',
+        );
+        return;
+      }
+
+      if (customStartDate > customEndDate) {
+        onValidationError(
+          'Período inválido',
+          'A data inicial deve ser anterior ou igual à data final.',
         );
         return;
       }
@@ -157,19 +172,15 @@ export function TransactionFiltersModal({
         {draft.periodScope === 'custom' ? (
           <View style={styles.twoColumns}>
             <View style={styles.column}>
-              <FormTextInput
+              <DateInput
                 label="Data inicial"
-                keyboardType="numeric"
-                maxLength={10}
                 onChangeText={setStartDate}
                 value={startDate}
               />
             </View>
             <View style={styles.column}>
-              <FormTextInput
+              <DateInput
                 label="Data final"
-                keyboardType="numeric"
-                maxLength={10}
                 onChangeText={setEndDate}
                 value={endDate}
               />
