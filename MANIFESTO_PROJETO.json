@@ -1,0 +1,339 @@
+{
+  "project": "Finanças em Dia",
+  "baselineVersion": "1.0.2",
+  "generatedAt": "2026-07-13T17:18:34.085Z",
+  "algorithm": "SHA-256",
+  "fileCount": 66,
+  "files": [
+    {
+      "path": ".gitignore",
+      "size": 440,
+      "sha256": "5936b94a73a28b6735de672b54c2c058a33c9ae1edb62d87d6a4418e14447805"
+    },
+    {
+      "path": "app.json",
+      "size": 994,
+      "sha256": "3b2bd662a1ec142af9c8ab6357f1365fa70d13346a91f5e9549537363b3623ce"
+    },
+    {
+      "path": "App.tsx",
+      "size": 3376,
+      "sha256": "a654667df499d10672d4a72a76437903362e20387012b857337ccdcc6b13c310"
+    },
+    {
+      "path": "assets/android-icon-background.png",
+      "size": 17549,
+      "sha256": "fb139c2dee362ebf2070e23b96da6fc0d43f8492de38b8af1fd7223e19b5861d"
+    },
+    {
+      "path": "assets/android-icon-foreground.png",
+      "size": 78796,
+      "sha256": "9e3d0315a33c6799de601dd34cd8bf8cc3a8d16f3bf75592baec2ceb7240b391"
+    },
+    {
+      "path": "assets/android-icon-monochrome.png",
+      "size": 4140,
+      "sha256": "6371fc2c12e33ad2215a86c281db3d682a81bebe7c957a842c13b8bf00cceb83"
+    },
+    {
+      "path": "assets/favicon.png",
+      "size": 1129,
+      "sha256": "a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba"
+    },
+    {
+      "path": "assets/icon.png",
+      "size": 393493,
+      "sha256": "119462bb78eb240a65c869fc067ee599639b3cb5a41953f25c07b17d2a8c7e0f"
+    },
+    {
+      "path": "assets/splash-icon.png",
+      "size": 17547,
+      "sha256": "5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8"
+    },
+    {
+      "path": "dist-web/_expo/static/js/web/index-900f37f3a2f518691db209bca9aea019.js",
+      "size": 1615501,
+      "sha256": "b645b0f7b9423174e7f087859510a6c9e497d335c8cf72f1f770be58d1e09686"
+    },
+    {
+      "path": "dist-web/favicon.ico",
+      "size": 14510,
+      "sha256": "8184b2ca6c201c87bade03c6d01497e4cd1a416046ca8a48db0ae3c3c758fc8c"
+    },
+    {
+      "path": "dist-web/index.html",
+      "size": 1221,
+      "sha256": "b267eefa1edcd68b7fed4517559ecff171b825feccaf3ef360ef224d67850827"
+    },
+    {
+      "path": "dist-web/metadata.json",
+      "size": 49,
+      "sha256": "aa5f19cc84d41c0f8c70ececb2bc82e863227ea1e121632aca879eb616056991"
+    },
+    {
+      "path": "index.ts",
+      "size": 140,
+      "sha256": "2c7c9c62e1070c5211b9e3a9c82449f6966d977d03914624498212e6ed4843dd"
+    },
+    {
+      "path": "LICENSE",
+      "size": 1106,
+      "sha256": "fb3ca4a837f5779e83cef89b78253a8949cfb9429c340309f62d0465ec6610b4"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 252326,
+      "sha256": "84856c428016c4ce8b579416e99b324f9fde78294fd1f01307459aa49946ca14"
+    },
+    {
+      "path": "package.json",
+      "size": 1254,
+      "sha256": "b287dec3ffab68ea73c504811cb80a4f987ae3418e229e2efc2a8c3c261a93f4"
+    },
+    {
+      "path": "README.md",
+      "size": 1525,
+      "sha256": "b5ebc83a0b9b062c00c49692dc608854c501aeb7946697b626c2eaaa0de38a39"
+    },
+    {
+      "path": "Referencia_Projeto_FinancasEmDia.md",
+      "size": 4907,
+      "sha256": "793a611dfe93d552b51a7fb1b7343d01a43e7a8612374f0c6d6ca23248a0e5ec"
+    },
+    {
+      "path": "RELATORIO_VALIDACAO.md",
+      "size": 1195,
+      "sha256": "55047ef74eda9c008f507e9368224ec6de46e124267de347cb0f9909fcc01bc0"
+    },
+    {
+      "path": "scripts/generate-project-manifest.mjs",
+      "size": 1561,
+      "sha256": "00034e1cd5e7cd7537fd76c972d22fb9dce5296c399ec7daebd9c40c565f9c0c"
+    },
+    {
+      "path": "src/application/navigation/AppNavigator.tsx",
+      "size": 2874,
+      "sha256": "b8e0695aea2d0150b5d64951155fbfccb85be441ececf0c3f51f0e0e28ebe546"
+    },
+    {
+      "path": "src/application/store/hooks.ts",
+      "size": 284,
+      "sha256": "f65db5cc8e5fc9598bd64fa07062342919bef869a8806f703ca1e24474936db0"
+    },
+    {
+      "path": "src/application/store/index.ts",
+      "size": 1989,
+      "sha256": "f3ddfdc559c47784c43feaf3dc3e93e35284444ad7e820db90a6f81e580de62c"
+    },
+    {
+      "path": "src/domain/entities/Account.ts",
+      "size": 261,
+      "sha256": "82261359acc27aab65986ecb35b7452462b1a4f4f425fd0a294c719d55fc692f"
+    },
+    {
+      "path": "src/domain/entities/AppSnapshot.ts",
+      "size": 354,
+      "sha256": "c511dcbcac5f20291ae75f243d49273c501c6810a5212b48809bf7db82f7eb89"
+    },
+    {
+      "path": "src/domain/entities/Category.ts",
+      "size": 205,
+      "sha256": "8d83e586af8a6893c6851a62b9047f9859581ce110a5a2fb31511dc8f048a07d"
+    },
+    {
+      "path": "src/domain/entities/Settings.ts",
+      "size": 191,
+      "sha256": "7b813df23e305eb28b1439077e21861baeabe9b11384bb2fe9a1e1f9b6206996"
+    },
+    {
+      "path": "src/domain/entities/Transaction.ts",
+      "size": 382,
+      "sha256": "bc18f457e0b92e6a6ca8bb6d3ae485e54ba52dbe4010f99f55a90136c75c4f22"
+    },
+    {
+      "path": "src/domain/repositories/IAppDataRepository.ts",
+      "size": 212,
+      "sha256": "9a53dd17d068590108a31637a697b0ce48a014054d9bfa7ef7e73261228650ab"
+    },
+    {
+      "path": "src/features/accounts/accountsSlice.ts",
+      "size": 897,
+      "sha256": "ed3aaca83a95e304c538ac6de5e878dfc26b69e1f2f94f3d6352dfa47edc9e15"
+    },
+    {
+      "path": "src/features/app/appSlice.ts",
+      "size": 675,
+      "sha256": "88b626fa7cdc09407d2274de78eeb925f8016ee68f2196869e66055b951a2e18"
+    },
+    {
+      "path": "src/features/categories/categoriesSlice.ts",
+      "size": 929,
+      "sha256": "fd0e1a5b8fcc612604e4b5f34283b85864c28dfdcbc4a0cd1c7cd3eef41d7958"
+    },
+    {
+      "path": "src/features/settings/settingsSlice.ts",
+      "size": 914,
+      "sha256": "f0347ea0196df66ea002b506695c9e619beec86b803f8f15eff9965c827c76af"
+    },
+    {
+      "path": "src/features/transactions/transactionsSlice.ts",
+      "size": 1335,
+      "sha256": "b5ab529e58227c05f124ab1be65b7967c6fc6b2841d7480ca8fb863039d2014f"
+    },
+    {
+      "path": "src/infrastructure/persistence/appDataRepository.native.ts",
+      "size": 244,
+      "sha256": "ef1719dec03d0328a0730916e68074d6c387406356af8f4d137145cfb8b1a4ee"
+    },
+    {
+      "path": "src/infrastructure/persistence/appDataRepository.web.ts",
+      "size": 262,
+      "sha256": "a2278a0fde9a22b43e04ea3fd8bb5ce2088ca24ebf3077259c488315a631874d"
+    },
+    {
+      "path": "src/infrastructure/persistence/AsyncStorageAppDataRepository.ts",
+      "size": 823,
+      "sha256": "9adcec49b918d97f1fa3cacf39e62c92a8689295dc71e363ff9fea88730e4902"
+    },
+    {
+      "path": "src/infrastructure/persistence/SQLiteAppDataRepository.ts",
+      "size": 1834,
+      "sha256": "fbfa0037b0b4b7a7de0301d480a0521f796047775b5dfc68ff1ff808e93bea80"
+    },
+    {
+      "path": "src/infrastructure/seed/createInitialSnapshot.ts",
+      "size": 2825,
+      "sha256": "01246d2cc423839af944cc4cd05f604d15f945de5d70fb8d2aad97c885128b36"
+    },
+    {
+      "path": "src/infrastructure/seed/normalizeAppSnapshot.ts",
+      "size": 1974,
+      "sha256": "add0ed6f69b577b7db8ec7af7560f6656e3667f75bff68b4e6e4ca2f08ca58d4"
+    },
+    {
+      "path": "src/presentation/components/AppButton.tsx",
+      "size": 2116,
+      "sha256": "d939e07d79eb52a029b53218aa951a519bfc4b93bac0b75e60dbff3e68bf07d2"
+    },
+    {
+      "path": "src/presentation/components/AppCard.tsx",
+      "size": 577,
+      "sha256": "f0759633977ab832290a336161308ccc791cc8b027e3bd1e66ded5721a744afa"
+    },
+    {
+      "path": "src/presentation/components/AppHeader.tsx",
+      "size": 1008,
+      "sha256": "f803fa989605baf1666cc0f201ce8302c306183d91287dcf0d41195e0f1cdcd5"
+    },
+    {
+      "path": "src/presentation/components/AppScreen.tsx",
+      "size": 1428,
+      "sha256": "73f81eb36f52782893203d63274333423f42b2b5c6e74df648bd79ac161aa224"
+    },
+    {
+      "path": "src/presentation/components/AppText.tsx",
+      "size": 1243,
+      "sha256": "7a4ac2d93bb06cdfef8dcb7019c429289e5d4fbc0b7c2d882184288a94a62618"
+    },
+    {
+      "path": "src/presentation/components/EmptyState.tsx",
+      "size": 936,
+      "sha256": "1208632b83beae9a1597925037f22aa28d556a858d5a8dfb543f12b3fe41a8c4"
+    },
+    {
+      "path": "src/presentation/components/FilterChip.tsx",
+      "size": 1138,
+      "sha256": "ba34ca7a34087b6299db0f956ccbf9c01efb77a20cafd3db17d4bf2a50b602e5"
+    },
+    {
+      "path": "src/presentation/components/FormTextInput.tsx",
+      "size": 1171,
+      "sha256": "4750bef19358e0706516de1b59b235f90044e2749e49f62b25155302cb1cc04c"
+    },
+    {
+      "path": "src/presentation/components/MoneyInput.tsx",
+      "size": 1786,
+      "sha256": "b4c2f45d6920871094d9476bcd7bcd7ae9b57973bcea26e1d62aca24190b0e3d"
+    },
+    {
+      "path": "src/presentation/components/SectionTitle.tsx",
+      "size": 653,
+      "sha256": "8b45a0edf09aaa29b124a33d21e071eb4307162a6db3a6b285a191e3e7b94b1e"
+    },
+    {
+      "path": "src/presentation/components/SummaryCard.tsx",
+      "size": 1457,
+      "sha256": "14dc78773d3e99c9ee860d44c87594aa0f5217dc6fb292e521553b2b7577a70d"
+    },
+    {
+      "path": "src/presentation/components/TransactionRow.tsx",
+      "size": 2719,
+      "sha256": "ac7a5afafc374ec307d6d5394cfaf43bd49079dededecebf0f3d9e26051a93ae"
+    },
+    {
+      "path": "src/presentation/screens/AddTransactionScreen.tsx",
+      "size": 6701,
+      "sha256": "5715409e9e0a78a7f501e50b260f31ac3f422764c77210ede186798342290ab6"
+    },
+    {
+      "path": "src/presentation/screens/HomeScreen.tsx",
+      "size": 4723,
+      "sha256": "24ee18552b0222cdd71f812bc0c9f89c6fb28d74a3de2207619362821209f07a"
+    },
+    {
+      "path": "src/presentation/screens/ReportsScreen.tsx",
+      "size": 4662,
+      "sha256": "8444e06a0b628ce5f7cd972138886f4ec417f452466a0342f98870a58b130183"
+    },
+    {
+      "path": "src/presentation/screens/SettingsScreen.tsx",
+      "size": 9870,
+      "sha256": "037b13c4b3462b39ddd8f8ea7c196e9cd5e7dee80335534e43e158b024199205"
+    },
+    {
+      "path": "src/presentation/screens/TransactionsScreen.tsx",
+      "size": 5071,
+      "sha256": "50c008649fa90a599fe3e73d8c1e533f8759b4fe92376877d30cb4b8079a534c"
+    },
+    {
+      "path": "src/presentation/theme/AppThemeProvider.tsx",
+      "size": 1747,
+      "sha256": "a11bfc01d09bed837e5a9bd9955dd2dae818e33ce046b4e29e3380ef0702cfe8"
+    },
+    {
+      "path": "src/presentation/theme/colors.ts",
+      "size": 718,
+      "sha256": "4b88dd44f1306130d8f8859c4ab87f39f499fe8af9fd55762fb4fae3ae92943c"
+    },
+    {
+      "path": "src/shared/constants/storage.ts",
+      "size": 152,
+      "sha256": "026d5d106be8e1a5efac8d42643cb307c75f7c0929e96a72e1a081d97087cc0f"
+    },
+    {
+      "path": "src/shared/utils/createId.ts",
+      "size": 178,
+      "sha256": "2aa2ac8eb186ca320c7083290cabd06590e7afca072e2f75f3b0ed072b947b5d"
+    },
+    {
+      "path": "src/shared/utils/currency.ts",
+      "size": 564,
+      "sha256": "5ba5386dcf8e64180d290bb5da841cf793ff2045ec7b8f1a3c7ae69ecf15ed8b"
+    },
+    {
+      "path": "src/shared/utils/date.ts",
+      "size": 1361,
+      "sha256": "a4b6f315a6e9470bdd594a34f89993f195d05ab7d0f72e11ea28abb35d68daf6"
+    },
+    {
+      "path": "src/shared/utils/financialPeriod.ts",
+      "size": 1381,
+      "sha256": "39c43c4ea53a359b083a349d3f8d21029180ffa41c22094a5ab6d265d41edc01"
+    },
+    {
+      "path": "tsconfig.json",
+      "size": 194,
+      "sha256": "fc52cc97439c371af73773f8866a8363b18f6588de7193cbe3b027979be731be"
+    }
+  ]
+}

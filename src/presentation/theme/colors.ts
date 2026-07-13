@@ -1,0 +1,33 @@
+export const lightColors = {
+  background: '#F4F7FB',
+  surface: '#FFFFFF',
+  surfaceSecondary: '#EAF0F7',
+  primary: '#1D5F8A',
+  primaryStrong: '#164A6B',
+  secondary: '#2F7D6D',
+  text: '#17202A',
+  muted: '#667585',
+  border: '#D8E1EA',
+  income: '#247A55',
+  expense: '#B64646',
+  warning: '#9A6A17',
+  white: '#FFFFFF',
+  shadow: '#0B1A2A',
+} as const;
+
+export const darkColors = {
+  background: '#0F1419',
+  surface: '#171E25',
+  surfaceSecondary: '#202A33',
+  primary: '#5EA9D6',
+  primaryStrong: '#83BFE1',
+  secondary: '#69B7A6',
+  text: '#F0F4F7',
+  muted: '#9AA9B5',
+  border: '#2B3741',
+  income: '#6AC292',
+  expense: '#E47C7C',
+  warning: '#D7AA5A',
+  white: '#FFFFFF',
+  shadow: '#000000',
+} as const;
