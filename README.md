@@ -1,6 +1,6 @@
 # Finanças em Dia
 
-Versão atual: **1.0.3**
+Versão atual: **1.0.4**
 
 Aplicativo mobile e web para controle financeiro pessoal, construído com React Native, Expo e TypeScript.
 
@@ -50,6 +50,7 @@ Os dados são persistidos automaticamente após alterações no Redux.
 - Caso a hidratação demore mais de 3 segundos, a splash permanece visível até a inicialização terminar.
 - A imagem utilizada fica em `assets/images/splash.png`.
 - A configuração nativa inicial está registrada no `app.json` para evitar uma transição visual brusca.
+- Três pontos animados são exibidos abaixo do texto “Controle financeiro pessoal” durante o carregamento.
 
 ## Funcionalidades desta entrega
 
@@ -63,7 +64,7 @@ Os dados são persistidos automaticamente após alterações no Redux.
 - Tema claro, escuro ou do sistema
 - Configuração do início do ciclo entre os dias 1 e 28
 - Exclusão e redefinição dos dados locais
-- Tela de splash com duração mínima de 3 segundos
+- Tela de splash com duração mínima de 3 segundos e indicador animado de três pontos
 
 ## Escopo posterior
 

@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
 Última atualização: 13/07/2026  
-Versão da referência: 1.0.3
+Versão da referência: 1.0.4
 
 ## 1. Identidade
 
@@ -69,6 +69,7 @@ Abas inferiores:
 - A tela de splash é exibida por no mínimo 3 segundos antes da navegação principal.
 - A hidratação local é executada durante a exibição da splash.
 - Se a hidratação ultrapassar 3 segundos, a splash permanece até a conclusão ou falha controlada do bootstrap.
+- Durante a splash, três pontos verdes são animados sequencialmente abaixo do texto “Controle financeiro pessoal”.
 
 ## 6. Estrutura principal de arquivos
 
@@ -104,9 +105,16 @@ Abas inferiores:
 - Tema claro, escuro e do sistema.
 - Configuração do dia inicial do ciclo.
 - Redefinição dos dados locais.
-- Tela de splash com arte própria e duração mínima de 3 segundos.
+- Tela de splash com arte própria, duração mínima de 3 segundos e indicador animado de três pontos.
 
 ## 8. Correções e evoluções registradas
+
+### Versão 1.0.4
+
+- Adicionado indicador de carregamento com três pontos animados em `AppSplashScreen.tsx`.
+- Os pontos aparecem abaixo do texto “Controle financeiro pessoal”, mantendo a arte original da splash sem alteração.
+- A animação usa `Animated` com opacidade e escala sequenciais, `useNativeDriver` e interrupção no desmontar da tela.
+- A estratégia de entrega foi ajustada: os próximos pacotes devem conter apenas os arquivos modificados, preservando a estrutura relativa do projeto para extração direta.
 
 ### Versão 1.0.3
 
@@ -146,5 +154,6 @@ Antes de alterar um arquivo existente:
 2. Preservar funcionalidades e decisões já registradas.
 3. Atualizar este documento ao incluir, remover ou renomear arquivos.
 4. Entregar arquivos completos, não apenas trechos.
-5. Executar a validação TypeScript antes de gerar o pacote.
-6. Atualizar `MANIFESTO_PROJETO.json` com `npm run manifest`.
+5. Gerar um único arquivo ZIP contendo somente os arquivos modificados e suas pastas relativas.
+6. Executar a validação TypeScript antes de gerar o pacote.
+7. Atualizar `MANIFESTO_PROJETO.json` com `npm run manifest`.
