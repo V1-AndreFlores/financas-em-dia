@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
 Última atualização: 13/07/2026  
-Versão da referência: 1.0.5
+Versão da referência: 1.1.0
 
 ## 1. Identidade
 
@@ -25,24 +25,28 @@ Versão da referência: 1.0.5
 - React Navigation
 - AsyncStorage para Web
 - SQLite para Android/iOS
+- Expo Notifications
+- Expo Local Authentication
+- Expo Secure Store
+- Expo Crypto
 
-## 3. Decisões de arquitetura
+## 3. Arquitetura
 
-A aplicação usa Clean Architecture adaptada ao mobile:
+Clean Architecture adaptada ao mobile:
 
-- `domain`: entidades e contratos independentes de framework.
-- `infrastructure`: persistência, seeds e implementações técnicas.
-- `features`: estados e regras de atualização por domínio.
-- `presentation`: telas, componentes e tema.
-- `application`: composição, navegação e store.
-- `shared`: utilitários sem dependência de feature.
+- `domain`: entidades e contratos.
+- `infrastructure`: persistência, normalização, notificações e segurança.
+- `features`: slices Redux e regras de alteração de estado.
+- `presentation`: telas, modais, formulários e tema.
+- `application`: navegação, composição e store.
+- `shared`: utilitários de moeda, datas, períodos, IDs e séries financeiras.
 
-A persistência é feita por `IAppDataRepository`. O adaptador é escolhido por plataforma:
+Persistência por plataforma:
 
 - Web: `AsyncStorageAppDataRepository`
 - Android/iOS: `SQLiteAppDataRepository`
 
-O snapshot persistido possui versão 1 e contém contas, categorias, lançamentos e ajustes.
+O snapshot atual possui `version: 2` e contém contas, categorias, lançamentos e ajustes.
 
 ## 4. Navegação
 
@@ -54,129 +58,203 @@ Abas inferiores:
 4. Relatórios
 5. Ajustes
 
-## 5. Regras atuais
+As telas Início, Lançamentos e Relatórios compartilham o mesmo deslocamento de ciclo pelo slice `financialPeriod`.
 
-- Valores monetários são armazenados em centavos.
+## 5. Regras financeiras
+
+- Valores são persistidos em centavos.
 - Datas são persistidas em `yyyy-MM-dd` e exibidas em `dd/MM/yyyy`.
-- Lançamentos podem ser receita ou despesa.
-- Situações disponíveis: efetivado ou pendente.
-- O resumo considera apenas lançamentos efetivados.
-- O ciclo financeiro aceita início entre os dias 1 e 28.
-- O dia 1 é o padrão e equivale ao mês-calendário.
-- Contas e categorias personalizadas são arquivadas, não removidas fisicamente.
-- Categorias e contas padrão não podem ser arquivadas pela interface atual.
-- Dados ficam somente no dispositivo nesta versão.
-- A tela de splash é exibida por no mínimo 3 segundos antes da navegação principal.
-- A hidratação local é executada durante a exibição da splash.
-- Se a hidratação ultrapassar 3 segundos, a splash permanece até a conclusão ou falha controlada do bootstrap.
-- Durante a splash, três pontos verdes são animados sequencialmente abaixo do texto “Controle financeiro pessoal”.
-- Alertas nativos não devem ser usados para fluxos de interação do usuário; utilizar os componentes visuais próprios.
-- Menus de ações usam painel inferior e podem ser fechados pelo fundo.
-- Confirmações destrutivas usam diálogo centralizado, não fecham ao tocar fora e sempre apresentam uma ação de cancelamento.
-- Ações destrutivas usam botão vermelho preenchido; cancelar usa botão secundário sem destaque excessivo.
-- Os modais não usam ícones nas ações.
+- Tipos: receita ou despesa.
+- Situações: efetivado ou pendente.
+- O resultado do ciclo considera somente lançamentos efetivados dentro do período.
+- O saldo consolidado considera saldos iniciais válidos e lançamentos efetivados até o final do ciclo selecionado.
+- O início do ciclo aceita dias de 1 a 28.
+- A navegação aceita até 120 ciclos anteriores ou futuros.
+- Contas e categorias personalizadas são arquivadas, sem exclusão física pela interface.
 
-## 6. Estrutura principal de arquivos
+## 6. Saldo inicial
 
-- `App.tsx`: bootstrap, hidratação, controle do tempo da splash e composição global.
-- `assets/images/splash.png`: arte vertical exibida na inicialização.
-- `src/application/navigation/AppNavigator.tsx`: abas inferiores.
-- `src/application/store/index.ts`: Redux Store e persistência automática.
-- `src/domain/entities/*`: entidades do domínio.
-- `src/domain/repositories/IAppDataRepository.ts`: contrato de persistência.
-- `src/infrastructure/persistence/*`: AsyncStorage e SQLite.
-- `src/infrastructure/seed/createInitialSnapshot.ts`: dados iniciais.
-- `src/infrastructure/seed/normalizeAppSnapshot.ts`: normalização e recuperação de snapshots persistidos incompletos.
-- `src/features/*`: slices Redux.
-- `src/presentation/components/*`: componentes reutilizáveis.
-- `src/presentation/components/AppModal.tsx`: base animada para modais centralizados e painéis inferiores.
-- `src/presentation/components/AppActionSheet.tsx`: painel inferior para listas de ações.
-- `src/presentation/components/AppDialog.tsx`: diálogo centralizado para validações, mensagens e confirmações.
-- `src/presentation/screens/AppSplashScreen.tsx`: tela visual de inicialização.
-- `src/presentation/screens/*`: demais telas.
-- `src/presentation/theme/*`: temas claro e escuro.
-- `src/shared/utils/*`: moeda, datas, IDs e período financeiro.
-- `MANIFESTO_PROJETO.json`: relação de arquivos e hashes SHA-256 da baseline.
+Cada conta possui:
 
-## 7. Funcionalidades entregues
+- `initialBalanceInCents`
+- `initialBalanceDate`
+- `updatedAt`
 
-- Painel do ciclo financeiro.
-- Saldo consolidado.
-- Total de receitas, despesas e pendências.
-- Cadastro de receitas e despesas.
-- Histórico pesquisável.
-- Alteração entre efetivado e pendente.
-- Exclusão de lançamentos.
-- Relatório de despesas por categoria.
-- Cadastro e arquivamento de contas personalizadas.
-- Cadastro e arquivamento de categorias personalizadas.
-- Tema claro, escuro e do sistema.
-- Configuração do dia inicial do ciclo.
-- Redefinição dos dados locais.
-- Tela de splash com arte própria, duração mínima de 3 segundos e indicador animado de três pontos.
-- Modais personalizados e consistentes com os temas claro e escuro.
-- Painel inferior para ações de lançamentos.
-- Segundo diálogo de confirmação antes da exclusão definitiva de lançamentos e da redefinição dos dados.
+O saldo inicial só participa do consolidado quando sua data é anterior ou igual ao final do ciclo consultado.
 
-## 8. Correções e evoluções registradas
+Contas padrão e personalizadas podem ter nome, tipo, saldo inicial e data editados.
 
-### Versão 1.0.5
+## 7. Lançamentos únicos, recorrentes e parcelados
 
-- Criados `AppModal`, `AppActionSheet` e `AppDialog` como componentes reutilizáveis.
-- Substituídos todos os `Alert.alert` das telas de lançamentos, novo lançamento e ajustes.
-- As ações de um lançamento agora são exibidas em painel inferior com identidade visual do aplicativo.
-- A exclusão de lançamento abre um segundo diálogo centralizado de confirmação.
-- A redefinição completa dos dados também exige confirmação destrutiva centralizada.
-- Validações e mensagens de sucesso usam diálogos próprios, compatíveis com tema claro e escuro.
-- Ações destrutivas usam botão vermelho; cancelar usa botão secundário sem ícones.
-- O painel de ações fecha ao tocar fora; confirmações destrutivas não fecham pelo fundo.
-- Adicionadas animações suaves de entrada e saída com `Animated` e `useNativeDriver`.
+### Único
 
-### Versão 1.0.4
+Cria uma movimentação independente.
 
-- Adicionado indicador de carregamento com três pontos animados em `AppSplashScreen.tsx`.
-- Os pontos aparecem abaixo do texto “Controle financeiro pessoal”, mantendo a arte original da splash sem alteração.
-- A animação usa `Animated` com opacidade e escala sequenciais, `useNativeDriver` e interrupção no desmontar da tela.
-- A estratégia de entrega foi ajustada: os próximos pacotes devem conter apenas os arquivos modificados, preservando a estrutura relativa do projeto para extração direta.
+### Recorrente
 
-### Versão 1.0.3
+Frequências disponíveis:
 
-- Criada `AppSplashScreen.tsx` para exibir a arte de abertura em Android, iOS e Web.
-- Adicionada a imagem `assets/images/splash.png`.
-- O bootstrap agora executa a hidratação dos dados em paralelo com um temporizador de 3 segundos.
-- A navegação principal só é apresentada depois do tempo mínimo da splash e da conclusão da hidratação.
-- Em caso de falha na hidratação, a splash é encerrada após o tempo mínimo e a mensagem controlada de erro é apresentada.
-- O `app.json` foi atualizado para usar a mesma imagem como splash nativa inicial e preservar o identificador do projeto EAS.
+- semanal;
+- quinzenal;
+- mensal;
+- anual.
 
-### Versão 1.0.2
+São geradas de 2 a 60 ocorrências. A primeira respeita a situação escolhida; as demais começam pendentes.
 
-- Corrigido erro em `AddTransactionScreen` ao acessar `state.categories.items` quando um snapshot persistido estava incompleto ou incompatível.
-- A hidratação normaliza os dados carregados antes de enviá-los aos slices Redux.
-- Arrays ausentes de contas, categorias ou lançamentos recebem valores seguros.
-- Ajustes inválidos do ciclo financeiro e tema são substituídos pelos valores padrão.
-- Seletores das telas receberam fallback defensivo para evitar falhas durante Fast Refresh ou estados incompletos em desenvolvimento.
-- O snapshot normalizado é salvo novamente após a hidratação.
+Cada ocorrência é uma entidade `FinancialTransaction` própria. Portanto, contas variáveis como luz, água ou condomínio podem ter o valor de cada mês editado separadamente sem alterar as outras ocorrências.
 
-## 9. Itens planejados para versões posteriores
+Metadados:
 
-- Cartões de crédito.
-- Compras parceladas.
-- Despesas e receitas recorrentes.
+- `entryMode: recurring`
+- `recurring.groupId`
+- `recurring.current`
+- `recurring.total`
+- `recurring.frequency`
+
+### Parcelado
+
+- Total permitido: 2 a 120 parcelas.
+- O usuário informa o número da parcela inicial.
+- A data informada corresponde à parcela inicial.
+- As parcelas seguintes são geradas mensalmente.
+- O valor informado é o valor de cada parcela.
+- A primeira parcela criada respeita a situação escolhida; as futuras começam pendentes.
+
+Metadados:
+
+- `entryMode: installment`
+- `installment.groupId`
+- `installment.current`
+- `installment.total`
+
+Exemplo: total 10 e início 3 gera 3/10 até 10/10.
+
+## 8. Edição de lançamentos
+
+A tela Lançamentos abre um painel inferior com:
+
+- Editar lançamento;
+- Marcar como pendente/efetivado;
+- Excluir lançamento.
+
+A edição permite alterar:
+
+- tipo;
+- descrição;
+- valor;
+- data;
+- categoria;
+- conta;
+- situação;
+- observação.
+
+Em recorrências e parcelamentos, a edição afeta somente a ocorrência selecionada.
+
+## 9. Filtros avançados
+
+Filtros combináveis:
+
+- ciclo selecionado;
+- todos os períodos;
+- período personalizado;
+- tipo;
+- situação;
+- categoria;
+- conta;
+- valor mínimo;
+- valor máximo;
+- pesquisa textual por descrição, observação, categoria ou conta.
+
+## 10. Notificações
+
+Implementação:
+
+- `notificationService.native.ts`: Expo Notifications no Android/iOS.
+- `notificationService.web.ts`: implementação sem efeito para manter compatibilidade Web.
+
+Regras:
+
+- somente despesas pendentes;
+- somente datas futuras;
+- antecedência de 0 a 7 dias;
+- horários pré-definidos na interface;
+- máximo de 64 notificações futuras;
+- todas as notificações são canceladas e recalculadas após alterações persistidas;
+- canal Android: `financial-reminders`.
+
+## 11. Biometria e PIN
+
+Modos:
+
+- `none`
+- `biometric`
+- `pin`
+
+A biometria exige hardware e credencial cadastrada no aparelho. O PIN aceita de 4 a 6 números e é salvo como hash SHA-256 com salt aleatório.
+
+Armazenamento:
+
+- Android/iOS: Expo Secure Store.
+- Web: AsyncStorage, com nível de proteção inferior ao armazenamento nativo.
+
+O aplicativo bloqueia ao iniciar e quando sai do estado ativo. O bloqueio protege a interface, não criptografa integralmente o snapshot financeiro.
+
+## 12. Inicialização e splash
+
+- Splash visual mínima de 3 segundos.
+- Hidratação executada em paralelo.
+- Três pontos animados abaixo de “Controle financeiro pessoal”.
+- Após hidratação, a segurança é validada antes de liberar a navegação.
+
+## 13. Modais
+
+- Não usar `Alert.alert` para fluxos do usuário.
+- Ações usam `AppActionSheet`.
+- Confirmações destrutivas usam `AppDialog`.
+- Formulários extensos usam `AppModal` em painel inferior.
+- Ações destrutivas são vermelhas.
+- Cancelar é secundário.
+- Não usar ícones nos botões dos modais.
+
+## 14. Arquivos adicionados na versão 1.1.0
+
+- `src/features/financialPeriod/financialPeriodSlice.ts`
+- `src/infrastructure/notifications/notificationService.native.ts`
+- `src/infrastructure/notifications/notificationService.web.ts`
+- `src/infrastructure/security/securityService.native.ts`
+- `src/infrastructure/security/securityService.web.ts`
+- `src/presentation/components/AccountFormModal.tsx`
+- `src/presentation/components/FinancialPeriodNavigator.tsx`
+- `src/presentation/components/PinSetupModal.tsx`
+- `src/presentation/components/TransactionFiltersModal.tsx`
+- `src/presentation/components/TransactionFormModal.tsx`
+- `src/presentation/screens/AppLockScreen.tsx`
+- `src/shared/utils/transactionSeries.ts`
+
+## 15. Dependências nativas adicionadas
+
+- `expo-notifications ~57.0.3`
+- `expo-local-authentication ~57.0.0`
+- `expo-secure-store ~57.0.0`
+- `expo-crypto ~57.0.0`
+
+Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas exigem novo build EAS.
+
+## 16. Próximos itens planejados
+
+- Cartões de crédito e faturas.
+- Transferências entre contas.
 - Orçamento por categoria.
 - Metas financeiras.
-- Exportação.
-- Backup e restauração em nuvem.
-- Biometria.
-- Notificações.
+- Exportação, backup e restauração.
+- Testes automatizados das regras financeiras.
 
-## 10. Regra para próximas alterações
+## 17. Regra permanente de entrega
 
-Antes de alterar um arquivo existente:
-
-1. Trabalhar sempre sobre a versão mais recente do arquivo.
-2. Preservar funcionalidades e decisões já registradas.
-3. Atualizar este documento ao incluir, remover ou renomear arquivos.
-4. Entregar arquivos completos, não apenas trechos.
-5. Gerar um único arquivo ZIP contendo somente os arquivos modificados e suas pastas relativas.
-6. Executar a validação TypeScript antes de gerar o pacote.
-7. Atualizar `MANIFESTO_PROJETO.json` com `npm run manifest`.
+1. Trabalhar sobre a versão mais recente.
+2. Preservar funcionalidades existentes.
+3. Atualizar esta referência e o manifesto.
+4. Entregar arquivos completos.
+5. Gerar um único ZIP contendo somente arquivos modificados, preservando `financas-em-dia/...`.
+6. Informar a linha do Expo e a linha do GitHub.
+7. Validar TypeScript e bundles antes do pacote.

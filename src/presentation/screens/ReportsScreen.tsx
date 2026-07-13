@@ -3,8 +3,13 @@ import { StyleSheet, View } from 'react-native';
 
 import { useAppSelector } from '../../application/store/hooks';
 import { formatCurrency } from '../../shared/utils/currency';
-import { getFinancialPeriod, isDateInPeriod } from '../../shared/utils/financialPeriod';
+import {
+  getFinancialPeriod,
+  getFinancialPeriodReferenceDate,
+  isDateInPeriod,
+} from '../../shared/utils/financialPeriod';
 import { AppCard } from '../components/AppCard';
+import { FinancialPeriodNavigator } from '../components/FinancialPeriodNavigator';
 import { AppHeader } from '../components/AppHeader';
 import { AppScreen } from '../components/AppScreen';
 import { AppText } from '../components/AppText';
@@ -17,8 +22,12 @@ export function ReportsScreen() {
   const categories = useAppSelector((state) => state.categories?.items ?? []);
   const transactions = useAppSelector((state) => state.transactions?.items ?? []);
   const startDay = useAppSelector((state) => state.settings.financialMonthStartDay);
+  const monthOffset = useAppSelector((state) => state.financialPeriod.monthOffset);
 
-  const period = getFinancialPeriod(new Date(), startDay);
+  const period = getFinancialPeriod(
+    getFinancialPeriodReferenceDate(monthOffset),
+    startDay,
+  );
 
   const report = useMemo(() => {
     const expenseTransactions = transactions.filter(
@@ -63,6 +72,8 @@ export function ReportsScreen() {
         title="Relatórios"
         subtitle={`Despesas efetivadas no ciclo de ${period.label}.`}
       />
+
+      <FinancialPeriodNavigator />
 
       <AppCard style={styles.totalCard}>
         <AppText color="muted">Total de despesas no ciclo</AppText>

@@ -2,50 +2,77 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../application/store/hooks';
-import type {
-  FinancialTransaction,
-  TransactionType,
-} from '../../domain/entities/Transaction';
+import type { FinancialTransaction } from '../../domain/entities/Transaction';
 import {
   transactionDeleted,
   transactionStatusChanged,
+  transactionUpdated,
 } from '../../features/transactions/transactionsSlice';
+import {
+  getFinancialPeriod,
+  getFinancialPeriodReferenceDate,
+  isDateInPeriod,
+} from '../../shared/utils/financialPeriod';
 import { AppActionSheet } from '../components/AppActionSheet';
+import { AppButton } from '../components/AppButton';
 import { AppCard } from '../components/AppCard';
 import { AppDialog } from '../components/AppDialog';
+import { FinancialPeriodNavigator } from '../components/FinancialPeriodNavigator';
 import { AppHeader } from '../components/AppHeader';
 import { AppScreen } from '../components/AppScreen';
 import { EmptyState } from '../components/EmptyState';
 import { FilterChip } from '../components/FilterChip';
 import { FormTextInput } from '../components/FormTextInput';
+import {
+  defaultTransactionAdvancedFilters,
+  TransactionFiltersModal,
+  type TransactionAdvancedFilters,
+} from '../components/TransactionFiltersModal';
+import { TransactionFormModal } from '../components/TransactionFormModal';
 import { TransactionRow } from '../components/TransactionRow';
 
-type TransactionFilter = 'all' | TransactionType;
-type SelectedTransaction = Pick<FinancialTransaction, 'id' | 'description' | 'status'>;
-
 const MODAL_TRANSITION_DELAY = 190;
+
+interface FeedbackDialogState {
+  title: string;
+  message: string;
+}
 
 export function TransactionsScreen() {
   const dispatch = useAppDispatch();
   const accounts = useAppSelector((state) => state.accounts?.items ?? []);
   const categories = useAppSelector((state) => state.categories?.items ?? []);
   const transactions = useAppSelector((state) => state.transactions?.items ?? []);
+  const startDay = useAppSelector((state) => state.settings.financialMonthStartDay);
+  const monthOffset = useAppSelector((state) => state.financialPeriod.monthOffset);
 
-  const [filter, setFilter] = useState<TransactionFilter>('all');
   const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<TransactionAdvancedFilters>(
+    defaultTransactionAdvancedFilters,
+  );
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
-    useState<SelectedTransaction | null>(null);
+    useState<FinancialTransaction | null>(null);
+  const [editTransaction, setEditTransaction] =
+    useState<FinancialTransaction | null>(null);
   const [deleteTransaction, setDeleteTransaction] =
-    useState<SelectedTransaction | null>(null);
-  const deleteTransitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useState<FinancialTransaction | null>(null);
+  const [feedbackDialog, setFeedbackDialog] =
+    useState<FeedbackDialogState | null>(null);
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(
     () => () => {
-      if (deleteTransitionTimer.current) {
-        clearTimeout(deleteTransitionTimer.current);
+      if (transitionTimer.current) {
+        clearTimeout(transitionTimer.current);
       }
     },
     [],
+  );
+
+  const period = getFinancialPeriod(
+    getFinancialPeriodReferenceDate(monthOffset),
+    startDay,
   );
 
   const categoryMap = useMemo(
@@ -61,7 +88,43 @@ export function TransactionsScreen() {
     const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR');
 
     return [...transactions]
-      .filter((transaction) => filter === 'all' || transaction.type === filter)
+      .filter((transaction) => {
+        if (filters.periodScope === 'cycle') {
+          return isDateInPeriod(transaction.date, period);
+        }
+
+        if (
+          filters.periodScope === 'custom' &&
+          filters.customStartDate &&
+          filters.customEndDate
+        ) {
+          return (
+            transaction.date >= filters.customStartDate &&
+            transaction.date <= filters.customEndDate
+          );
+        }
+
+        return true;
+      })
+      .filter((transaction) => filters.type === 'all' || transaction.type === filters.type)
+      .filter(
+        (transaction) =>
+          filters.status === 'all' || transaction.status === filters.status,
+      )
+      .filter(
+        (transaction) =>
+          filters.categoryId === null || transaction.categoryId === filters.categoryId,
+      )
+      .filter(
+        (transaction) =>
+          filters.accountId === null || transaction.accountId === filters.accountId,
+      )
+      .filter(
+        (transaction) =>
+          transaction.amountInCents >= filters.minimumAmountInCents &&
+          (filters.maximumAmountInCents === 0 ||
+            transaction.amountInCents <= filters.maximumAmountInCents),
+      )
       .filter((transaction) => {
         if (!normalizedSearch) {
           return true;
@@ -70,7 +133,7 @@ export function TransactionsScreen() {
         const categoryName = categoryMap.get(transaction.categoryId) ?? '';
         const accountName = accountMap.get(transaction.accountId) ?? '';
         const searchableValue =
-          `${transaction.description} ${categoryName} ${accountName}`.toLocaleLowerCase(
+          `${transaction.description} ${categoryName} ${accountName} ${transaction.notes ?? ''}`.toLocaleLowerCase(
             'pt-BR',
           );
 
@@ -80,15 +143,17 @@ export function TransactionsScreen() {
         const byDate = b.date.localeCompare(a.date);
         return byDate !== 0 ? byDate : b.createdAt.localeCompare(a.createdAt);
       });
-  }, [accountMap, categoryMap, filter, search, transactions]);
+  }, [accountMap, categoryMap, filters, period, search, transactions]);
 
-  const openActions = (transaction: FinancialTransaction) => {
-    setSelectedTransaction({
-      id: transaction.id,
-      description: transaction.description,
-      status: transaction.status,
-    });
-  };
+  const activeFilterCount = [
+    filters.periodScope !== 'cycle',
+    filters.type !== 'all',
+    filters.status !== 'all',
+    filters.categoryId !== null,
+    filters.accountId !== null,
+    filters.minimumAmountInCents > 0,
+    filters.maximumAmountInCents > 0,
+  ].filter(Boolean).length;
 
   const changeSelectedStatus = () => {
     if (!selectedTransaction) {
@@ -104,6 +169,19 @@ export function TransactionsScreen() {
     setSelectedTransaction(null);
   };
 
+  const openEdit = () => {
+    if (!selectedTransaction) {
+      return;
+    }
+
+    const transaction = selectedTransaction;
+    setSelectedTransaction(null);
+    transitionTimer.current = setTimeout(() => {
+      setEditTransaction(transaction);
+      transitionTimer.current = null;
+    }, MODAL_TRANSITION_DELAY);
+  };
+
   const requestDeleteConfirmation = () => {
     if (!selectedTransaction) {
       return;
@@ -111,10 +189,9 @@ export function TransactionsScreen() {
 
     const transaction = selectedTransaction;
     setSelectedTransaction(null);
-
-    deleteTransitionTimer.current = setTimeout(() => {
+    transitionTimer.current = setTimeout(() => {
       setDeleteTransaction(transaction);
-      deleteTransitionTimer.current = null;
+      transitionTimer.current = null;
     }, MODAL_TRANSITION_DELAY);
   };
 
@@ -127,57 +204,79 @@ export function TransactionsScreen() {
     setDeleteTransaction(null);
   };
 
+  const saveEditedTransaction = (transaction: FinancialTransaction) => {
+    dispatch(transactionUpdated(transaction));
+    setEditTransaction(null);
+    setFeedbackDialog({
+      title: 'Lançamento atualizado',
+      message: 'As alterações foram salvas no dispositivo.',
+    });
+  };
+
   return (
     <>
       <AppScreen>
         <AppHeader
           title="Lançamentos"
-          subtitle="Consulte, filtre e atualize suas movimentações."
+          subtitle="Consulte, filtre, edite e atualize suas movimentações."
         />
+
+        <FinancialPeriodNavigator />
 
         <FormTextInput
           label="Pesquisar"
           onChangeText={setSearch}
-          placeholder="Descrição, categoria ou conta"
+          placeholder="Descrição, observação, categoria ou conta"
           value={search}
         />
 
         <View style={styles.filters}>
           <FilterChip
             label="Todos"
-            selected={filter === 'all'}
-            onPress={() => setFilter('all')}
+            selected={filters.type === 'all'}
+            onPress={() => setFilters((current) => ({ ...current, type: 'all' }))}
           />
           <FilterChip
             label="Despesas"
-            selected={filter === 'expense'}
-            onPress={() => setFilter('expense')}
+            selected={filters.type === 'expense'}
+            onPress={() => setFilters((current) => ({ ...current, type: 'expense' }))}
           />
           <FilterChip
             label="Receitas"
-            selected={filter === 'income'}
-            onPress={() => setFilter('income')}
+            selected={filters.type === 'income'}
+            onPress={() => setFilters((current) => ({ ...current, type: 'income' }))}
           />
+        </View>
+
+        <View style={styles.filterActions}>
+          <AppButton
+            title={`Filtros avançados${activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}`}
+            variant="secondary"
+            onPress={() => setFiltersVisible(true)}
+          />
+          {activeFilterCount > 0 ? (
+            <AppButton
+              title="Limpar"
+              variant="ghost"
+              onPress={() => setFilters(defaultTransactionAdvancedFilters)}
+            />
+          ) : null}
         </View>
 
         <AppCard>
           {filteredTransactions.length === 0 ? (
             <EmptyState
               title="Nenhum resultado"
-              description="Altere os filtros ou registre um novo lançamento."
+              description="Altere os filtros, navegue para outro ciclo ou registre um novo lançamento."
             />
           ) : (
             filteredTransactions.map((transaction) => (
               <TransactionRow
                 key={transaction.id}
                 transaction={transaction}
-                categoryName={
-                  categoryMap.get(transaction.categoryId) ?? 'Sem categoria'
-                }
-                accountName={
-                  accountMap.get(transaction.accountId) ?? 'Conta removida'
-                }
-                onPress={() => openActions(transaction)}
+                categoryName={categoryMap.get(transaction.categoryId) ?? 'Sem categoria'}
+                accountName={accountMap.get(transaction.accountId) ?? 'Conta removida'}
+                onPress={() => setSelectedTransaction(transaction)}
               />
             ))
           )}
@@ -193,6 +292,11 @@ export function TransactionsScreen() {
             : undefined
         }
         actions={[
+          {
+            title: 'Editar lançamento',
+            variant: 'primary',
+            onPress: openEdit,
+          },
           {
             title:
               selectedTransaction?.status === 'paid'
@@ -210,12 +314,36 @@ export function TransactionsScreen() {
         onRequestClose={() => setSelectedTransaction(null)}
       />
 
+      <TransactionFormModal
+        visible={editTransaction !== null}
+        transaction={editTransaction}
+        accounts={accounts}
+        categories={categories}
+        onRequestClose={() => setEditTransaction(null)}
+        onSave={saveEditedTransaction}
+        onValidationError={(title, message) => setFeedbackDialog({ title, message })}
+      />
+
+      <TransactionFiltersModal
+        visible={filtersVisible}
+        value={filters}
+        period={period}
+        accounts={accounts}
+        categories={categories}
+        onApply={(nextFilters) => {
+          setFilters(nextFilters);
+          setFiltersVisible(false);
+        }}
+        onRequestClose={() => setFiltersVisible(false)}
+        onValidationError={(title, message) => setFeedbackDialog({ title, message })}
+      />
+
       <AppDialog
         visible={deleteTransaction !== null}
         title="Excluir lançamento?"
         message={
           deleteTransaction
-            ? `O lançamento “${deleteTransaction.description}” será removido definitivamente. Esta ação não pode ser desfeita.`
+            ? `O lançamento “${deleteTransaction.description}” será removido somente nesta ocorrência. Esta ação não pode ser desfeita.`
             : undefined
         }
         onRequestClose={() => setDeleteTransaction(null)}
@@ -232,15 +360,34 @@ export function TransactionsScreen() {
           },
         ]}
       />
+
+      <AppDialog
+        visible={feedbackDialog !== null}
+        title={feedbackDialog?.title ?? ''}
+        message={feedbackDialog?.message}
+        onRequestClose={() => setFeedbackDialog(null)}
+        actions={[
+          {
+            title: 'Continuar',
+            onPress: () => setFeedbackDialog(null),
+          },
+        ]}
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  filters: {
+  filterActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
     marginBottom: 16,
+  },
+  filters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
   },
 });

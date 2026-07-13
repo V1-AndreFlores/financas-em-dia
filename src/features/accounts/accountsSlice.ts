@@ -20,15 +20,24 @@ const accountsSlice = createSlice({
     accountAdded(state, action: PayloadAction<Account>) {
       state.items.push(action.payload);
     },
+    accountUpdated(state, action: PayloadAction<Account>) {
+      const index = state.items.findIndex((item) => item.id === action.payload.id);
+
+      if (index >= 0) {
+        state.items[index] = action.payload;
+      }
+    },
     accountArchived(state, action: PayloadAction<string>) {
       const account = state.items.find((item) => item.id === action.payload);
 
       if (account) {
         account.isActive = false;
+        account.updatedAt = new Date().toISOString();
       }
     },
   },
 });
 
-export const { accountAdded, accountArchived, accountsReplaced } = accountsSlice.actions;
+export const { accountAdded, accountArchived, accountsReplaced, accountUpdated } =
+  accountsSlice.actions;
 export const accountsReducer = accountsSlice.reducer;

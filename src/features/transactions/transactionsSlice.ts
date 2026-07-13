@@ -20,6 +20,16 @@ const transactionsSlice = createSlice({
     transactionAdded(state, action: PayloadAction<FinancialTransaction>) {
       state.items.push(action.payload);
     },
+    transactionsAdded(state, action: PayloadAction<FinancialTransaction[]>) {
+      state.items.push(...action.payload);
+    },
+    transactionUpdated(state, action: PayloadAction<FinancialTransaction>) {
+      const index = state.items.findIndex((item) => item.id === action.payload.id);
+
+      if (index >= 0) {
+        state.items[index] = action.payload;
+      }
+    },
     transactionDeleted(state, action: PayloadAction<string>) {
       state.items = state.items.filter((item) => item.id !== action.payload);
     },
@@ -40,7 +50,9 @@ const transactionsSlice = createSlice({
 export const {
   transactionAdded,
   transactionDeleted,
+  transactionsAdded,
   transactionsReplaced,
   transactionStatusChanged,
+  transactionUpdated,
 } = transactionsSlice.actions;
 export const transactionsReducer = transactionsSlice.reducer;

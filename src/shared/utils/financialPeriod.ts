@@ -12,6 +12,17 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
+export function addMonths(date: Date, months: number): Date {
+  const result = new Date(date);
+  result.setDate(1);
+  result.setMonth(result.getMonth() + months);
+  return result;
+}
+
+export function getFinancialPeriodReferenceDate(monthOffset: number): Date {
+  return addMonths(new Date(), monthOffset);
+}
+
 export function getFinancialPeriod(
   referenceDate: Date,
   startDay: number,

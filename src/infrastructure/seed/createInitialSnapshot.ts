@@ -4,25 +4,29 @@ const createdAt = '2026-01-01T00:00:00.000Z';
 
 export function createInitialSnapshot(): AppSnapshot {
   return {
-    version: 1,
+    version: 2,
     accounts: [
       {
         id: 'account-main',
         name: 'Conta principal',
         type: 'checking',
         initialBalanceInCents: 0,
+        initialBalanceDate: '2026-01-01',
         isDefault: true,
         isActive: true,
         createdAt,
+        updatedAt: createdAt,
       },
       {
         id: 'account-cash',
         name: 'Dinheiro',
         type: 'cash',
         initialBalanceInCents: 0,
+        initialBalanceDate: '2026-01-01',
         isDefault: true,
         isActive: true,
         createdAt,
+        updatedAt: createdAt,
       },
     ],
     categories: [
@@ -129,6 +133,10 @@ export function createInitialSnapshot(): AppSnapshot {
       locale: 'pt-BR',
       currency: 'BRL',
       financialMonthStartDay: 1,
+      notificationsEnabled: false,
+      notificationDaysBefore: 1,
+      notificationHour: 9,
+      appLockMode: 'none',
     },
   };
 }

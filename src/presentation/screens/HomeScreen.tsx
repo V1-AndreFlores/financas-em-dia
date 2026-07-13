@@ -2,8 +2,13 @@ import { StyleSheet, View } from 'react-native';
 
 import { useAppSelector } from '../../application/store/hooks';
 import { formatCurrency } from '../../shared/utils/currency';
-import { getFinancialPeriod, isDateInPeriod } from '../../shared/utils/financialPeriod';
+import {
+  getFinancialPeriod,
+  getFinancialPeriodReferenceDate,
+  isDateInPeriod,
+} from '../../shared/utils/financialPeriod';
 import { AppCard } from '../components/AppCard';
+import { FinancialPeriodNavigator } from '../components/FinancialPeriodNavigator';
 import { AppHeader } from '../components/AppHeader';
 import { AppScreen } from '../components/AppScreen';
 import { AppText } from '../components/AppText';
@@ -17,8 +22,12 @@ export function HomeScreen() {
   const categories = useAppSelector((state) => state.categories?.items ?? []);
   const transactions = useAppSelector((state) => state.transactions?.items ?? []);
   const startDay = useAppSelector((state) => state.settings.financialMonthStartDay);
+  const monthOffset = useAppSelector((state) => state.financialPeriod.monthOffset);
 
-  const period = getFinancialPeriod(new Date(), startDay);
+  const period = getFinancialPeriod(
+    getFinancialPeriodReferenceDate(monthOffset),
+    startDay,
+  );
   const currentTransactions = transactions.filter((transaction) =>
     isDateInPeriod(transaction.date, period),
   );
@@ -40,12 +49,25 @@ export function HomeScreen() {
     .reduce((total, transaction) => total + transaction.amountInCents, 0);
 
   const accountInitialBalance = accounts
-    .filter((account) => account.isActive)
+    .filter(
+      (account) =>
+        account.isActive &&
+        account.initialBalanceDate <= period.end,
+    )
     .reduce((total, account) => total + account.initialBalanceInCents, 0);
 
-  const balance = accountInitialBalance + income - expenses;
+  const paidThroughPeriodEnd = transactions.filter(
+    (transaction) => transaction.status === 'paid' && transaction.date <= period.end,
+  );
+  const accumulatedIncome = paidThroughPeriodEnd
+    .filter((transaction) => transaction.type === 'income')
+    .reduce((total, transaction) => total + transaction.amountInCents, 0);
+  const accumulatedExpenses = paidThroughPeriodEnd
+    .filter((transaction) => transaction.type === 'expense')
+    .reduce((total, transaction) => total + transaction.amountInCents, 0);
+  const balance = accountInitialBalance + accumulatedIncome - accumulatedExpenses;
 
-  const recentTransactions = [...transactions]
+  const recentTransactions = [...currentTransactions]
     .sort((a, b) => {
       const byDate = b.date.localeCompare(a.date);
       return byDate !== 0 ? byDate : b.createdAt.localeCompare(a.createdAt);
@@ -59,16 +81,18 @@ export function HomeScreen() {
     <AppScreen>
       <AppHeader
         title="Finanças em Dia"
-        subtitle={`Ciclo atual: ${period.label}`}
+        subtitle="Acompanhe o resultado e o saldo de cada ciclo financeiro."
       />
 
+      <FinancialPeriodNavigator />
+
       <AppCard style={styles.balanceCard}>
-        <AppText color="muted">Saldo consolidado</AppText>
+        <AppText color="muted">Saldo consolidado ao final do ciclo</AppText>
         <AppText variant="hero" color={balance < 0 ? 'expense' : 'primary'}>
           {formatCurrency(balance)}
         </AppText>
         <AppText variant="caption" color="muted">
-          Considera saldos iniciais e lançamentos efetivados.
+          Considera os saldos iniciais e todos os lançamentos efetivados até {period.end.split('-').reverse().join('/')}.
         </AppText>
       </AppCard>
 
@@ -100,15 +124,15 @@ export function HomeScreen() {
       </View>
 
       <SectionTitle
-        title="Últimos lançamentos"
-        description="Movimentações mais recentes de todas as contas."
+        title="Lançamentos do ciclo"
+        description="Cinco movimentações mais recentes do período selecionado."
       />
 
       <AppCard>
         {recentTransactions.length === 0 ? (
           <EmptyState
-            title="Nenhum lançamento"
-            description="Use a aba Adicionar para registrar sua primeira receita ou despesa."
+            title="Nenhum lançamento neste ciclo"
+            description="Use a aba Adicionar ou navegue para outro ciclo financeiro."
           />
         ) : (
           recentTransactions.map((transaction) => (

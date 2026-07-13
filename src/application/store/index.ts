@@ -5,23 +5,34 @@ import {
 } from '@reduxjs/toolkit';
 
 import { appDataRepository } from '../../infrastructure/persistence/appDataRepository';
-import { accountAdded, accountArchived, accountsReducer } from '../../features/accounts/accountsSlice';
+import { notificationService } from '../../infrastructure/notifications/notificationService';
+import {
+  accountAdded,
+  accountArchived,
+  accountsReducer,
+  accountUpdated,
+} from '../../features/accounts/accountsSlice';
 import { appReducer } from '../../features/app/appSlice';
 import {
   categoryAdded,
   categoryArchived,
   categoriesReducer,
 } from '../../features/categories/categoriesSlice';
+import { financialPeriodReducer } from '../../features/financialPeriod/financialPeriodSlice';
 import {
+  appLockModeChanged,
   financialMonthStartDayChanged,
+  notificationSettingsChanged,
   settingsReducer,
   themeChanged,
 } from '../../features/settings/settingsSlice';
 import {
   transactionAdded,
   transactionDeleted,
+  transactionsAdded,
   transactionsReducer,
   transactionStatusChanged,
+  transactionUpdated,
 } from '../../features/transactions/transactionsSlice';
 
 const persistenceListener = createListenerMiddleware();
@@ -31,6 +42,7 @@ export const store = configureStore({
     app: appReducer,
     accounts: accountsReducer,
     categories: categoriesReducer,
+    financialPeriod: financialPeriodReducer,
     settings: settingsReducer,
     transactions: transactionsReducer,
   },
@@ -38,18 +50,25 @@ export const store = configureStore({
     getDefaultMiddleware().prepend(persistenceListener.middleware),
 });
 
+const persistedActions = isAnyOf(
+  accountAdded,
+  accountArchived,
+  accountUpdated,
+  appLockModeChanged,
+  categoryAdded,
+  categoryArchived,
+  financialMonthStartDayChanged,
+  notificationSettingsChanged,
+  themeChanged,
+  transactionAdded,
+  transactionDeleted,
+  transactionsAdded,
+  transactionStatusChanged,
+  transactionUpdated,
+);
+
 persistenceListener.startListening({
-  matcher: isAnyOf(
-    accountAdded,
-    accountArchived,
-    categoryAdded,
-    categoryArchived,
-    financialMonthStartDayChanged,
-    themeChanged,
-    transactionAdded,
-    transactionDeleted,
-    transactionStatusChanged,
-  ),
+  matcher: persistedActions,
   effect: async (_action, listenerApi) => {
     listenerApi.cancelActiveListeners();
     await listenerApi.delay(250);
@@ -60,13 +79,21 @@ persistenceListener.startListening({
       return;
     }
 
-    await appDataRepository.save({
-      version: 1,
+    const snapshot = {
+      version: 2 as const,
       accounts: state.accounts?.items ?? [],
       categories: state.categories?.items ?? [],
       transactions: state.transactions?.items ?? [],
       settings: state.settings,
-    });
+    };
+
+    await appDataRepository.save(snapshot);
+
+    try {
+      await notificationService.sync(snapshot.transactions, snapshot.settings);
+    } catch {
+      // A persistência financeira não deve falhar caso o SO recuse uma notificação.
+    }
   },
 });
 

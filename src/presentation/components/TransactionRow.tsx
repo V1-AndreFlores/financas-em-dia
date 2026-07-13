@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { FinancialTransaction } from '../../domain/entities/Transaction';
 import { formatCurrency } from '../../shared/utils/currency';
 import { isoDateToBr } from '../../shared/utils/date';
+import { getTransactionSeriesLabel } from '../../shared/utils/transactionSeries';
 import { AppText } from './AppText';
 import { useAppTheme } from '../theme/AppThemeProvider';
 
@@ -23,6 +24,7 @@ export function TransactionRow({
   const { theme } = useAppTheme();
   const isExpense = transaction.type === 'expense';
   const color = isExpense ? theme.colors.expense : theme.colors.income;
+  const seriesLabel = getTransactionSeriesLabel(transaction);
 
   return (
     <Pressable
@@ -49,6 +51,7 @@ export function TransactionRow({
         </AppText>
         <AppText variant="caption" color="muted" numberOfLines={1}>
           {categoryName} · {accountName} · {isoDateToBr(transaction.date)}
+          {seriesLabel ? ` · ${seriesLabel}` : ''}
         </AppText>
       </View>
 

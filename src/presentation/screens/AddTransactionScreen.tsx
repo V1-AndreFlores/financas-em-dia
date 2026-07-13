@@ -3,16 +3,18 @@ import { StyleSheet, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../application/store/hooks';
 import type {
+  RecurrenceFrequency,
+  TransactionEntryMode,
   TransactionStatus,
   TransactionType,
 } from '../../domain/entities/Transaction';
-import { transactionAdded } from '../../features/transactions/transactionsSlice';
-import { createId } from '../../shared/utils/createId';
+import { transactionsAdded } from '../../features/transactions/transactionsSlice';
+import { brDateToIso, isoDateToBr, todayIsoDate } from '../../shared/utils/date';
 import {
-  brDateToIso,
-  isoDateToBr,
-  todayIsoDate,
-} from '../../shared/utils/date';
+  createInstallmentTransactions,
+  createRecurringTransactions,
+  createSingleTransaction,
+} from '../../shared/utils/transactionSeries';
 import { AppButton } from '../components/AppButton';
 import { AppCard } from '../components/AppCard';
 import { AppDialog } from '../components/AppDialog';
@@ -30,6 +32,13 @@ interface FeedbackDialogState {
   actionTitle?: string;
 }
 
+const frequencyLabels: Record<RecurrenceFrequency, string> = {
+  weekly: 'Semanal',
+  biweekly: 'Quinzenal',
+  monthly: 'Mensal',
+  yearly: 'Anual',
+};
+
 export function AddTransactionScreen() {
   const dispatch = useAppDispatch();
   const accounts = useAppSelector((state) =>
@@ -39,6 +48,7 @@ export function AddTransactionScreen() {
     (state.categories?.items ?? []).filter((category) => category.isActive),
   );
 
+  const [entryMode, setEntryMode] = useState<TransactionEntryMode>('single');
   const [type, setType] = useState<TransactionType>('expense');
   const [description, setDescription] = useState('');
   const [amountInCents, setAmountInCents] = useState(0);
@@ -47,6 +57,11 @@ export function AddTransactionScreen() {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? '');
   const [status, setStatus] = useState<TransactionStatus>('paid');
   const [notes, setNotes] = useState('');
+  const [recurrenceFrequency, setRecurrenceFrequency] =
+    useState<RecurrenceFrequency>('monthly');
+  const [occurrenceCount, setOccurrenceCount] = useState('12');
+  const [totalInstallments, setTotalInstallments] = useState('10');
+  const [startingInstallment, setStartingInstallment] = useState('1');
   const [feedbackDialog, setFeedbackDialog] =
     useState<FeedbackDialogState | null>(null);
 
@@ -64,6 +79,7 @@ export function AddTransactionScreen() {
   };
 
   const resetForm = () => {
+    setEntryMode('single');
     setDescription('');
     setAmountInCents(0);
     setDate(isoDateToBr(todayIsoDate()));
@@ -71,6 +87,10 @@ export function AddTransactionScreen() {
     setAccountId(accounts[0]?.id ?? '');
     setStatus('paid');
     setNotes('');
+    setRecurrenceFrequency('monthly');
+    setOccurrenceCount('12');
+    setTotalInstallments('10');
+    setStartingInstallment('1');
   };
 
   const save = () => {
@@ -104,46 +124,81 @@ export function AddTransactionScreen() {
       return;
     }
 
-    if (!categoryId) {
+    if (!categoryId || !accountId) {
       setFeedbackDialog({
-        title: 'Categoria obrigatória',
-        message: 'Selecione uma categoria.',
+        title: 'Dados incompletos',
+        message: 'Selecione uma categoria e uma conta ou carteira.',
         actionTitle: 'Corrigir',
       });
       return;
     }
 
-    if (!accountId) {
-      setFeedbackDialog({
-        title: 'Conta obrigatória',
-        message: 'Selecione uma conta ou carteira.',
-        actionTitle: 'Corrigir',
-      });
-      return;
+    const baseInput = {
+      type,
+      description: normalizedDescription,
+      amountInCents,
+      date: isoDate,
+      categoryId,
+      accountId,
+      status,
+      notes: notes.trim() || undefined,
+    };
+
+    let generated;
+
+    if (entryMode === 'recurring') {
+      const count = Number(occurrenceCount);
+
+      if (!Number.isInteger(count) || count < 2 || count > 60) {
+        setFeedbackDialog({
+          title: 'Quantidade inválida',
+          message: 'Informe de 2 a 60 ocorrências para o lançamento recorrente.',
+          actionTitle: 'Corrigir',
+        });
+        return;
+      }
+
+      generated = createRecurringTransactions(baseInput, recurrenceFrequency, count);
+    } else if (entryMode === 'installment') {
+      const total = Number(totalInstallments);
+      const start = Number(startingInstallment);
+
+      if (!Number.isInteger(total) || total < 2 || total > 120) {
+        setFeedbackDialog({
+          title: 'Parcelamento inválido',
+          message: 'Informe um total entre 2 e 120 parcelas.',
+          actionTitle: 'Corrigir',
+        });
+        return;
+      }
+
+      if (!Number.isInteger(start) || start < 1 || start > total) {
+        setFeedbackDialog({
+          title: 'Parcela inicial inválida',
+          message: 'A parcela inicial deve estar entre 1 e o total do parcelamento.',
+          actionTitle: 'Corrigir',
+        });
+        return;
+      }
+
+      generated = createInstallmentTransactions(baseInput, total, start);
+    } else {
+      generated = [createSingleTransaction(baseInput)];
     }
 
-    const now = new Date().toISOString();
-
-    dispatch(
-      transactionAdded({
-        id: createId('transaction'),
-        type,
-        description: normalizedDescription,
-        amountInCents,
-        date: isoDate,
-        categoryId,
-        accountId,
-        status,
-        notes: notes.trim() || undefined,
-        createdAt: now,
-        updatedAt: now,
-      }),
-    );
-
+    dispatch(transactionsAdded(generated));
     resetForm();
+
+    const message =
+      entryMode === 'single'
+        ? 'O lançamento foi registrado no dispositivo.'
+        : entryMode === 'recurring'
+          ? `${generated.length} ocorrências foram criadas. Cada uma pode ser editada separadamente.`
+          : `${generated.length} parcelas foram criadas a partir da parcela ${startingInstallment}/${totalInstallments}.`;
+
     setFeedbackDialog({
       title: 'Lançamento salvo',
-      message: 'Os dados foram registrados no dispositivo.',
+      message,
       actionTitle: 'Continuar',
     });
   };
@@ -153,10 +208,29 @@ export function AddTransactionScreen() {
       <AppScreen>
         <AppHeader
           title="Novo lançamento"
-          subtitle="Registre uma receita ou despesa de forma rápida."
+          subtitle="Registre uma movimentação única, recorrente ou parcelada."
         />
 
         <AppCard>
+          <SectionTitle title="Forma de lançamento" />
+          <View style={styles.chips}>
+            <FilterChip
+              label="Único"
+              selected={entryMode === 'single'}
+              onPress={() => setEntryMode('single')}
+            />
+            <FilterChip
+              label="Recorrente"
+              selected={entryMode === 'recurring'}
+              onPress={() => setEntryMode('recurring')}
+            />
+            <FilterChip
+              label="Parcelado"
+              selected={entryMode === 'installment'}
+              onPress={() => setEntryMode('installment')}
+            />
+          </View>
+
           <SectionTitle title="Tipo" />
           <View style={styles.chips}>
             <FilterChip
@@ -175,24 +249,81 @@ export function AddTransactionScreen() {
             label="Descrição"
             maxLength={80}
             onChangeText={setDescription}
-            placeholder={type === 'expense' ? 'Ex.: Supermercado' : 'Ex.: Salário'}
+            placeholder={type === 'expense' ? 'Ex.: Conta de energia' : 'Ex.: Salário'}
             value={description}
           />
 
           <MoneyInput
-            label="Valor"
+            label={entryMode === 'installment' ? 'Valor de cada parcela' : 'Valor'}
             valueInCents={amountInCents}
             onChangeValue={setAmountInCents}
           />
 
           <FormTextInput
-            label="Data"
+            label={entryMode === 'installment' ? 'Data da parcela inicial' : 'Data inicial'}
             keyboardType="numeric"
             maxLength={10}
             onChangeText={setDate}
             placeholder="dd/MM/aaaa"
             value={date}
           />
+
+          {entryMode === 'recurring' ? (
+            <>
+              <SectionTitle
+                title="Periodicidade"
+                description="Os valores futuros podem ser alterados individualmente depois da criação."
+              />
+              <View style={styles.chips}>
+                {(Object.keys(frequencyLabels) as RecurrenceFrequency[]).map((frequency) => (
+                  <FilterChip
+                    key={frequency}
+                    label={frequencyLabels[frequency]}
+                    selected={recurrenceFrequency === frequency}
+                    onPress={() => setRecurrenceFrequency(frequency)}
+                  />
+                ))}
+              </View>
+              <FormTextInput
+                label="Quantidade de ocorrências"
+                keyboardType="number-pad"
+                maxLength={2}
+                onChangeText={(value) => setOccurrenceCount(value.replace(/\D/g, ''))}
+                placeholder="12"
+                value={occurrenceCount}
+              />
+            </>
+          ) : null}
+
+          {entryMode === 'installment' ? (
+            <>
+              <View style={styles.twoColumns}>
+                <View style={styles.column}>
+                  <FormTextInput
+                    label="Total de parcelas"
+                    keyboardType="number-pad"
+                    maxLength={3}
+                    onChangeText={(value) => setTotalInstallments(value.replace(/\D/g, ''))}
+                    placeholder="10"
+                    value={totalInstallments}
+                  />
+                </View>
+                <View style={styles.column}>
+                  <FormTextInput
+                    label="Começar na parcela"
+                    keyboardType="number-pad"
+                    maxLength={3}
+                    onChangeText={(value) => setStartingInstallment(value.replace(/\D/g, ''))}
+                    placeholder="1"
+                    value={startingInstallment}
+                  />
+                </View>
+              </View>
+              <AppText variant="caption" color="muted" style={styles.help}>
+                Exemplo: em uma compra de 10 vezes já na terceira parcela, informe total 10 e início 3. Serão criadas as parcelas 3/10 até 10/10.
+              </AppText>
+            </>
+          ) : null}
 
           <SectionTitle title="Categoria" />
           <View style={styles.chips}>
@@ -218,7 +349,7 @@ export function AddTransactionScreen() {
             ))}
           </View>
 
-          <SectionTitle title="Situação" />
+          <SectionTitle title="Situação da primeira ocorrência" />
           <View style={styles.chips}>
             <FilterChip
               label="Efetivado"
@@ -244,7 +375,7 @@ export function AddTransactionScreen() {
           />
 
           <AppText variant="caption" color="muted" style={styles.help}>
-            Todos os dados ficam armazenados localmente. A sincronização em nuvem não faz parte desta versão.
+            Ocorrências futuras são criadas como pendentes e podem ter valor, data, categoria, conta e situação editados separadamente.
           </AppText>
 
           <AppButton title="Salvar lançamento" onPress={save} fullWidth />
@@ -274,11 +405,20 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 18,
   },
+  column: {
+    flex: 1,
+    minWidth: 140,
+  },
   help: {
     marginBottom: 16,
   },
   notes: {
     minHeight: 88,
     textAlignVertical: 'top',
+  },
+  twoColumns: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
 });

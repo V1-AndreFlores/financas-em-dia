@@ -5,7 +5,9 @@ export interface Account {
   name: string;
   type: AccountType;
   initialBalanceInCents: number;
+  initialBalanceDate: string;
   isDefault: boolean;
   isActive: boolean;
   createdAt: string;
+  updatedAt: string;
 }

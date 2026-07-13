@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../application/store/hooks';
+import type { Account } from '../../domain/entities/Account';
 import type { CategoryType } from '../../domain/entities/Category';
-import type { ThemePreference } from '../../domain/entities/Settings';
+import type { AppLockMode, ThemePreference } from '../../domain/entities/Settings';
 import {
   accountAdded,
   accountArchived,
   accountsReplaced,
+  accountUpdated,
 } from '../../features/accounts/accountsSlice';
 import {
   categoriesReplaced,
@@ -15,14 +17,21 @@ import {
   categoryArchived,
 } from '../../features/categories/categoriesSlice';
 import {
+  appLockModeChanged,
   financialMonthStartDayChanged,
+  notificationSettingsChanged,
   settingsReplaced,
   themeChanged,
 } from '../../features/settings/settingsSlice';
 import { transactionsReplaced } from '../../features/transactions/transactionsSlice';
+import { notificationService } from '../../infrastructure/notifications/notificationService';
 import { appDataRepository } from '../../infrastructure/persistence/appDataRepository';
+import { securityService } from '../../infrastructure/security/securityService';
 import { createInitialSnapshot } from '../../infrastructure/seed/createInitialSnapshot';
 import { createId } from '../../shared/utils/createId';
+import { formatCurrency } from '../../shared/utils/currency';
+import { isoDateToBr } from '../../shared/utils/date';
+import { AccountFormModal } from '../components/AccountFormModal';
 import { AppButton } from '../components/AppButton';
 import { AppCard } from '../components/AppCard';
 import { AppDialog } from '../components/AppDialog';
@@ -31,6 +40,7 @@ import { AppScreen } from '../components/AppScreen';
 import { AppText } from '../components/AppText';
 import { FilterChip } from '../components/FilterChip';
 import { FormTextInput } from '../components/FormTextInput';
+import { PinSetupModal } from '../components/PinSetupModal';
 import { SectionTitle } from '../components/SectionTitle';
 
 const MODAL_TRANSITION_DELAY = 190;
@@ -45,15 +55,18 @@ export function SettingsScreen() {
   const dispatch = useAppDispatch();
   const accounts = useAppSelector((state) => state.accounts?.items ?? []);
   const categories = useAppSelector((state) => state.categories?.items ?? []);
+  const transactions = useAppSelector((state) => state.transactions?.items ?? []);
   const settings = useAppSelector((state) => state.settings);
 
   const [financialDayInput, setFinancialDayInput] = useState(
     String(settings.financialMonthStartDay),
   );
-  const [newAccountName, setNewAccountName] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryType, setNewCategoryType] =
     useState<Exclude<CategoryType, 'both'>>('expense');
+  const [accountEditorVisible, setAccountEditorVisible] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [pinSetupVisible, setPinSetupVisible] = useState(false);
   const [feedbackDialog, setFeedbackDialog] =
     useState<FeedbackDialogState | null>(null);
   const [resetConfirmationVisible, setResetConfirmationVisible] = useState(false);
@@ -68,61 +81,42 @@ export function SettingsScreen() {
     [],
   );
 
+  const showFeedback = (title: string, message: string, actionTitle = 'Continuar') => {
+    setFeedbackDialog({ title, message, actionTitle });
+  };
+
   const saveFinancialDay = () => {
     const day = Number(financialDayInput);
 
     if (!Number.isInteger(day) || day < 1 || day > 28) {
-      setFeedbackDialog({
-        title: 'Dia inválido',
-        message: 'Informe um número inteiro entre 1 e 28.',
-        actionTitle: 'Corrigir',
-      });
+      showFeedback('Dia inválido', 'Informe um número inteiro entre 1 e 28.', 'Corrigir');
       return;
     }
 
     dispatch(financialMonthStartDayChanged(day));
-    setFeedbackDialog({
-      title: 'Ciclo atualizado',
-      message: `O ciclo financeiro começará no dia ${day}.`,
-      actionTitle: 'Continuar',
-    });
+    showFeedback('Ciclo atualizado', `O ciclo financeiro começará no dia ${day}.`);
   };
 
-  const addAccount = () => {
-    const name = newAccountName.trim();
-
-    if (!name) {
-      setFeedbackDialog({
-        title: 'Nome obrigatório',
-        message: 'Informe o nome da conta ou carteira.',
-        actionTitle: 'Corrigir',
-      });
-      return;
+  const saveAccount = (account: Account) => {
+    if (editingAccount) {
+      dispatch(accountUpdated(account));
+    } else {
+      dispatch(accountAdded(account));
     }
 
-    dispatch(
-      accountAdded({
-        id: createId('account'),
-        name,
-        type: 'digital',
-        initialBalanceInCents: 0,
-        isDefault: false,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-      }),
+    setAccountEditorVisible(false);
+    setEditingAccount(null);
+    showFeedback(
+      editingAccount ? 'Conta atualizada' : 'Conta adicionada',
+      'O nome, o tipo e o saldo inicial foram salvos.',
     );
-    setNewAccountName('');
   };
 
   const addCategory = () => {
     const name = newCategoryName.trim();
 
     if (!name) {
-      setFeedbackDialog({
-        title: 'Nome obrigatório',
-        message: 'Informe o nome da categoria.',
-        actionTitle: 'Corrigir',
-      });
+      showFeedback('Nome obrigatório', 'Informe o nome da categoria.', 'Corrigir');
       return;
     }
 
@@ -139,11 +133,90 @@ export function SettingsScreen() {
     setNewCategoryName('');
   };
 
-  const resetAllData = () => {
-    setResetConfirmationVisible(true);
+  const saveNotificationSettings = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await notificationService.requestPermission();
+
+      if (!granted) {
+        showFeedback(
+          'Notificações não ativadas',
+          Platform.OS === 'web'
+            ? 'Os lembretes locais desta versão estão disponíveis no Android e iOS.'
+            : 'A permissão foi negada. Você pode liberá-la nas configurações do aparelho.',
+        );
+        return;
+      }
+    }
+
+    dispatch(
+      notificationSettingsChanged({
+        notificationsEnabled: enabled,
+        notificationDaysBefore: settings.notificationDaysBefore,
+        notificationHour: settings.notificationHour,
+      }),
+    );
   };
 
-  const confirmResetAllData = () => {
+  const updateNotificationTiming = (daysBefore: number, hour: number) => {
+    dispatch(
+      notificationSettingsChanged({
+        notificationsEnabled: settings.notificationsEnabled,
+        notificationDaysBefore: daysBefore,
+        notificationHour: hour,
+      }),
+    );
+  };
+
+  const enableBiometric = async () => {
+    if (Platform.OS === 'web') {
+      showFeedback(
+        'Biometria indisponível',
+        'A biometria é suportada apenas no aplicativo instalado no Android ou iOS.',
+      );
+      return;
+    }
+
+    if (!(await securityService.isBiometricAvailable())) {
+      showFeedback(
+        'Biometria não configurada',
+        'Cadastre uma impressão digital ou reconhecimento facial nas configurações do aparelho.',
+      );
+      return;
+    }
+
+    if (!(await securityService.authenticateBiometric())) {
+      showFeedback(
+        'Autenticação cancelada',
+        'A biometria não foi ativada porque a identidade não foi confirmada.',
+      );
+      return;
+    }
+
+    await securityService.clearPin();
+    dispatch(appLockModeChanged('biometric'));
+    showFeedback(
+      'Biometria ativada',
+      'O aplicativo será bloqueado ao abrir e quando retornar do segundo plano.',
+    );
+  };
+
+  const disableAppLock = async () => {
+    await securityService.clearPin();
+    dispatch(appLockModeChanged('none'));
+    showFeedback('Proteção desativada', 'O aplicativo não solicitará autenticação ao abrir.');
+  };
+
+  const savePin = async (pin: string) => {
+    await securityService.setPin(pin);
+    dispatch(appLockModeChanged('pin'));
+    setPinSetupVisible(false);
+    showFeedback(
+      'PIN ativado',
+      'O PIN será solicitado ao abrir ou retornar ao aplicativo.',
+    );
+  };
+
+  const confirmResetAllData = async () => {
     const snapshot = createInitialSnapshot();
 
     dispatch(accountsReplaced(snapshot.accounts));
@@ -152,15 +225,17 @@ export function SettingsScreen() {
     dispatch(settingsReplaced(snapshot.settings));
     setFinancialDayInput(String(snapshot.settings.financialMonthStartDay));
     setResetConfirmationVisible(false);
-    void appDataRepository.save(snapshot);
+    await Promise.all([
+      appDataRepository.save(snapshot),
+      securityService.clearPin(),
+      notificationService.clear(),
+    ]);
 
     feedbackTransitionTimer.current = setTimeout(() => {
-      setFeedbackDialog({
-        title: 'Dados redefinidos',
-        message:
-          'Os dados locais foram apagados e os cadastros padrão foram restaurados.',
-        actionTitle: 'Continuar',
-      });
+      showFeedback(
+        'Dados redefinidos',
+        'Os dados locais, o PIN e os lembretes foram apagados. Os cadastros padrão foram restaurados.',
+      );
       feedbackTransitionTimer.current = null;
     }, MODAL_TRANSITION_DELAY);
   };
@@ -169,32 +244,41 @@ export function SettingsScreen() {
     dispatch(themeChanged(preference));
   };
 
+  const selectLockMode = (mode: AppLockMode) => {
+    if (mode === 'none') {
+      void disableAppLock();
+    } else if (mode === 'biometric') {
+      void enableBiometric();
+    } else {
+      setPinSetupVisible(true);
+    }
+  };
+
   return (
     <>
       <AppScreen>
         <AppHeader
           title="Ajustes"
-          subtitle="Personalize o ciclo financeiro, aparência e cadastros."
+          subtitle="Personalize o ciclo, lembretes, segurança e cadastros."
         />
 
         <SectionTitle title="Aparência" />
         <AppCard style={styles.sectionCard}>
           <View style={styles.chips}>
-            <FilterChip
-              label="Sistema"
-              selected={settings.theme === 'system'}
-              onPress={() => setTheme('system')}
-            />
-            <FilterChip
-              label="Claro"
-              selected={settings.theme === 'light'}
-              onPress={() => setTheme('light')}
-            />
-            <FilterChip
-              label="Escuro"
-              selected={settings.theme === 'dark'}
-              onPress={() => setTheme('dark')}
-            />
+            {(['system', 'light', 'dark'] as ThemePreference[]).map((preference) => (
+              <FilterChip
+                key={preference}
+                label={
+                  preference === 'system'
+                    ? 'Sistema'
+                    : preference === 'light'
+                      ? 'Claro'
+                      : 'Escuro'
+                }
+                selected={settings.theme === preference}
+                onPress={() => setTheme(preference)}
+              />
+            ))}
           </View>
         </AppCard>
 
@@ -222,37 +306,137 @@ export function SettingsScreen() {
             ))}
           </View>
           <AppText variant="caption" color="muted" style={styles.explanation}>
-            Recomendação inicial: dia 1, equivalente ao mês-calendário. Você pode escolher um dia próximo ao recebimento principal.
+            A navegação por ciclos permite consultar meses anteriores e futuros sem alterar esta configuração.
           </AppText>
           <AppButton title="Salvar dia do ciclo" onPress={saveFinancialDay} fullWidth />
         </AppCard>
 
         <SectionTitle
-          title="Contas e carteiras"
-          description="Cadastre as origens e destinos dos lançamentos."
+          title="Lembretes"
+          description="Notificações locais para despesas pendentes próximas da data informada."
         />
         <AppCard style={styles.sectionCard}>
-          <FormTextInput
-            label="Nova conta"
-            maxLength={60}
-            onChangeText={setNewAccountName}
-            placeholder="Ex.: Banco digital"
-            value={newAccountName}
+          <View style={styles.chips}>
+            <FilterChip
+              label="Desativados"
+              selected={!settings.notificationsEnabled}
+              onPress={() => void saveNotificationSettings(false)}
+            />
+            <FilterChip
+              label="Ativados"
+              selected={settings.notificationsEnabled}
+              onPress={() => void saveNotificationSettings(true)}
+            />
+          </View>
+
+          <AppText variant="caption" color="muted" style={styles.subLabel}>
+            Avisar com antecedência
+          </AppText>
+          <View style={styles.chips}>
+            {[0, 1, 2, 3, 5, 7].map((days) => (
+              <FilterChip
+                key={days}
+                label={days === 0 ? 'No dia' : `${days} dia${days > 1 ? 's' : ''} antes`}
+                selected={settings.notificationDaysBefore === days}
+                onPress={() => updateNotificationTiming(days, settings.notificationHour)}
+              />
+            ))}
+          </View>
+
+          <AppText variant="caption" color="muted" style={styles.subLabel}>
+            Horário
+          </AppText>
+          <View style={styles.chips}>
+            {[8, 9, 12, 18, 20].map((hour) => (
+              <FilterChip
+                key={hour}
+                label={`${String(hour).padStart(2, '0')}:00`}
+                selected={settings.notificationHour === hour}
+                onPress={() =>
+                  updateNotificationTiming(settings.notificationDaysBefore, hour)
+                }
+              />
+            ))}
+          </View>
+          <AppText variant="caption" color="muted">
+            São agendados até 64 lembretes futuros. Alterações nos lançamentos reprogramam os avisos automaticamente.
+          </AppText>
+        </AppCard>
+
+        <SectionTitle
+          title="Proteção do aplicativo"
+          description="A biometria ou o PIN bloqueiam a interface; os dados financeiros continuam armazenados localmente."
+        />
+        <AppCard style={styles.sectionCard}>
+          <View style={styles.chips}>
+            <FilterChip
+              label="Sem bloqueio"
+              selected={settings.appLockMode === 'none'}
+              onPress={() => selectLockMode('none')}
+            />
+            <FilterChip
+              label="Biometria"
+              selected={settings.appLockMode === 'biometric'}
+              onPress={() => selectLockMode('biometric')}
+            />
+            <FilterChip
+              label="PIN"
+              selected={settings.appLockMode === 'pin'}
+              onPress={() => selectLockMode('pin')}
+            />
+          </View>
+          {settings.appLockMode === 'pin' ? (
+            <AppButton
+              title="Alterar PIN"
+              variant="secondary"
+              onPress={() => setPinSetupVisible(true)}
+              fullWidth
+            />
+          ) : null}
+        </AppCard>
+
+        <SectionTitle
+          title="Contas e saldos iniciais"
+          description="O saldo inicial entra no consolidado a partir da data definida."
+        />
+        <AppCard style={styles.sectionCard}>
+          <AppButton
+            title="Adicionar conta"
+            variant="secondary"
+            onPress={() => {
+              setEditingAccount(null);
+              setAccountEditorVisible(true);
+            }}
+            fullWidth
           />
-          <AppButton title="Adicionar conta" variant="secondary" onPress={addAccount} fullWidth />
           <View style={styles.list}>
             {accounts
               .filter((account) => account.isActive)
               .map((account) => (
                 <View key={account.id} style={styles.listRow}>
-                  <AppText style={styles.listLabel}>{account.name}</AppText>
-                  {!account.isDefault ? (
+                  <View style={styles.listContent}>
+                    <AppText style={styles.listLabel}>{account.name}</AppText>
+                    <AppText variant="caption" color="muted">
+                      Saldo inicial {formatCurrency(account.initialBalanceInCents)} em {isoDateToBr(account.initialBalanceDate)}
+                    </AppText>
+                  </View>
+                  <View style={styles.rowActions}>
                     <AppButton
-                      title="Arquivar"
+                      title="Editar"
                       variant="ghost"
-                      onPress={() => dispatch(accountArchived(account.id))}
+                      onPress={() => {
+                        setEditingAccount(account);
+                        setAccountEditorVisible(true);
+                      }}
                     />
-                  ) : null}
+                    {!account.isDefault ? (
+                      <AppButton
+                        title="Arquivar"
+                        variant="ghost"
+                        onPress={() => dispatch(accountArchived(account.id))}
+                      />
+                    ) : null}
+                  </View>
                 </View>
               ))}
           </View>
@@ -293,7 +477,7 @@ export function SettingsScreen() {
               .filter((category) => category.isActive && !category.isDefault)
               .map((category) => (
                 <View key={category.id} style={styles.listRow}>
-                  <View>
+                  <View style={styles.listContent}>
                     <AppText style={styles.listLabel}>{category.name}</AppText>
                     <AppText variant="caption" color="muted">
                       {category.type === 'expense' ? 'Despesa' : 'Receita'}
@@ -312,27 +496,45 @@ export function SettingsScreen() {
         <SectionTitle title="Dados do aplicativo" />
         <AppCard style={styles.sectionCard}>
           <AppText color="muted" style={styles.explanation}>
-            Esta ação apaga os dados armazenados localmente e recria os cadastros padrão.
+            Esta ação apaga lançamentos, ajustes, PIN e lembretes locais, restaurando os cadastros padrão.
           </AppText>
           <AppButton
             title="Apagar todos os dados"
             variant="danger"
-            onPress={resetAllData}
+            onPress={() => setResetConfirmationVisible(true)}
             fullWidth
           />
         </AppCard>
       </AppScreen>
 
+      <AccountFormModal
+        visible={accountEditorVisible}
+        account={editingAccount}
+        onRequestClose={() => {
+          setAccountEditorVisible(false);
+          setEditingAccount(null);
+        }}
+        onSave={saveAccount}
+        onValidationError={(title, message) => showFeedback(title, message, 'Corrigir')}
+      />
+
+      <PinSetupModal
+        visible={pinSetupVisible}
+        onRequestClose={() => setPinSetupVisible(false)}
+        onSave={savePin}
+        onValidationError={(title, message) => showFeedback(title, message, 'Corrigir')}
+      />
+
       <AppDialog
         visible={resetConfirmationVisible}
         title="Apagar todos os dados?"
-        message="Lançamentos, contas personalizadas, categorias e ajustes serão redefinidos. Esta ação não pode ser desfeita."
+        message="Lançamentos, contas personalizadas, categorias, PIN, notificações e ajustes serão redefinidos. Esta ação não pode ser desfeita."
         onRequestClose={() => setResetConfirmationVisible(false)}
         actions={[
           {
             title: 'Apagar definitivamente',
             variant: 'danger',
-            onPress: confirmResetAllData,
+            onPress: () => void confirmResetAllData(),
           },
           {
             title: 'Cancelar',
@@ -371,6 +573,10 @@ const styles = StyleSheet.create({
   list: {
     marginTop: 16,
   },
+  listContent: {
+    flex: 1,
+    marginRight: 8,
+  },
   listLabel: {
     fontWeight: '600',
   },
@@ -378,9 +584,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    minHeight: 58,
+    minHeight: 72,
+    paddingVertical: 8,
+  },
+  rowActions: {
+    alignItems: 'flex-end',
+    gap: 4,
   },
   sectionCard: {
     marginBottom: 12,
+  },
+  subLabel: {
+    marginBottom: 8,
   },
 });

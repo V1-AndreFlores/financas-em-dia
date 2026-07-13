@@ -2,7 +2,7 @@
   "expo": {
     "name": "Finanças em Dia",
     "slug": "financas-em-dia",
-    "version": "1.0.5",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -13,7 +13,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.andreflores.financasemdia"
+      "bundleIdentifier": "com.andreflores.financasemdia",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.andreflores.financasemdia",
@@ -31,7 +34,21 @@
     },
     "plugins": [
       "expo-sqlite",
-      "expo-font"
+      "expo-font",
+      "expo-notifications",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permita que o Finanças em Dia use o Face ID para proteger seus dados financeiros."
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Permita que o Finanças em Dia use o Face ID para proteger seus dados financeiros."
+        }
+      ]
     ],
     "extra": {
       "eas": {

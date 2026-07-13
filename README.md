@@ -1,21 +1,22 @@
 # Finanças em Dia
 
-Versão atual: **1.0.5**
+Versão atual: **1.1.0**
 
-Aplicativo mobile e web para controle financeiro pessoal, construído com React Native, Expo e TypeScript.
+Aplicativo mobile e web, offline-first, para controle financeiro pessoal. Construído com React Native, Expo e TypeScript.
 
 ## Tecnologias
 
 - Expo SDK 57
 - React Native 0.86
 - React 19
-- TypeScript
-- Redux Toolkit
-- React Redux
+- TypeScript 6
+- Redux Toolkit e React Redux
 - React Navigation
 - AsyncStorage na Web
 - SQLite no Android e iOS
-- Arquitetura offline-first
+- Expo Notifications para lembretes locais
+- Expo Local Authentication para biometria
+- Expo Secure Store e Expo Crypto para proteção do PIN
 
 ## Executar o projeto
 
@@ -33,6 +34,71 @@ npm run web
 npm run typecheck
 ```
 
+## Funcionalidades
+
+- Resumo financeiro por ciclo configurável.
+- Navegação compartilhada entre ciclos anteriores e futuros.
+- Cadastro de receitas e despesas únicas.
+- Lançamentos recorrentes com frequência semanal, quinzenal, mensal ou anual.
+- Cada ocorrência recorrente é independente e pode ter valor, data, situação, categoria, conta e observação editados.
+- Compras parceladas com geração automática das parcelas restantes.
+- Possibilidade de iniciar um parcelamento em qualquer parcela, por exemplo, da parcela 3/10 até 10/10.
+- Edição e exclusão individual de lançamentos.
+- Filtros avançados por ciclo, período personalizado, tipo, situação, categoria, conta e faixa de valor.
+- Cadastro e edição de contas com saldo inicial e data de referência.
+- Saldo consolidado calculado até o final do ciclo selecionado.
+- Lembretes locais para despesas pendentes.
+- Bloqueio por biometria ou PIN.
+- Temas claro, escuro ou conforme o sistema.
+- Tela de splash com duração mínima de 3 segundos e três pontos animados.
+- Modais próprios e consistentes com a identidade visual do aplicativo.
+
+## Recorrências
+
+Ao criar um lançamento recorrente, o aplicativo gera de 2 a 60 ocorrências. A primeira usa a situação escolhida; as futuras são criadas como pendentes.
+
+Isso permite cadastrar contas com valores variáveis, como energia elétrica: cada cobrança futura pode ser aberta na tela **Lançamentos** e editada separadamente quando o valor real for conhecido.
+
+## Parcelamentos
+
+O campo **Valor de cada parcela** representa o valor mensal. O usuário informa o total e a parcela em que deseja começar.
+
+Exemplo:
+
+```text
+Total: 10 parcelas
+Começar na parcela: 3
+```
+
+O aplicativo cria as parcelas 3/10, 4/10, ... até 10/10.
+
+## Navegação entre ciclos
+
+As telas **Início**, **Lançamentos** e **Relatórios** possuem um seletor de ciclo. As setas permitem consultar períodos anteriores ou futuros sem alterar o dia inicial configurado em Ajustes. Tocar no período retorna ao ciclo atual.
+
+## Notificações
+
+- Disponíveis no Android e iOS.
+- Usam notificações locais, sem servidor ou conta de usuário.
+- São programadas para despesas pendentes futuras.
+- O usuário escolhe a antecedência e o horário.
+- São mantidos até 64 lembretes futuros.
+- Alterações nos lançamentos reprogramam os avisos automaticamente.
+
+Após incluir ou alterar plugins nativos, gere um novo APK/AAB:
+
+```bash
+eas build -p android --profile preview
+```
+
+## Segurança
+
+- Biometria usa o mecanismo nativo do Android/iOS.
+- PIN possui de 4 a 6 números.
+- No Android/iOS, o hash do PIN fica no Secure Store do sistema.
+- Na Web, o PIN usa o armazenamento local do navegador e não oferece o mesmo nível de proteção nativa.
+- O bloqueio protege a interface do aplicativo; o snapshot financeiro não é criptografado integralmente nesta versão.
+
 ## Persistência
 
 A aplicação usa uma interface de repositório única:
@@ -40,52 +106,4 @@ A aplicação usa uma interface de repositório única:
 - Web: `AsyncStorageAppDataRepository`
 - Android/iOS: `SQLiteAppDataRepository`
 
-Os dados são persistidos automaticamente após alterações no Redux.
-
-## Inicialização e splash
-
-- A tela `AppSplashScreen` é exibida antes da navegação principal.
-- A duração mínima da splash é de 3 segundos.
-- A hidratação dos dados locais ocorre em paralelo com a splash.
-- Caso a hidratação demore mais de 3 segundos, a splash permanece visível até a inicialização terminar.
-- A imagem utilizada fica em `assets/images/splash.png`.
-- A configuração nativa inicial está registrada no `app.json` para evitar uma transição visual brusca.
-- Três pontos animados são exibidos abaixo do texto “Controle financeiro pessoal” durante o carregamento.
-
-## Modais e diálogos
-
-- Os alertas nativos do Android foram substituídos por componentes visuais próprios.
-- Menus de ações usam um painel inferior, mais acessível no uso com uma mão.
-- Confirmações destrutivas usam diálogo centralizado e botão vermelho.
-- A opção de cancelamento permanece secundária e sem destaque excessivo.
-- O painel de ações pode ser fechado tocando fora; confirmações destrutivas exigem uma escolha explícita.
-- A entrada e a saída usam animações suaves de opacidade, deslocamento e escala.
-- Os componentes reutilizáveis são `AppModal`, `AppActionSheet` e `AppDialog`.
-
-## Funcionalidades desta entrega
-
-- Resumo financeiro por ciclo
-- Receitas e despesas
-- Situação efetivada ou pendente
-- Contas e carteiras
-- Categorias padrão e personalizadas
-- Pesquisa e filtros de lançamentos
-- Relatório de despesas por categoria
-- Tema claro, escuro ou do sistema
-- Configuração do início do ciclo entre os dias 1 e 28
-- Exclusão e redefinição dos dados locais
-- Tela de splash com duração mínima de 3 segundos e indicador animado de três pontos
-- Modais personalizados para ações, validações, confirmações e mensagens de sucesso
-
-## Escopo posterior
-
-- Cartões de crédito
-- Parcelamentos
-- Metas financeiras
-- Orçamento por categoria
-- Backup em nuvem
-- Notificações
-
-## Recuperação de dados locais
-
-Na inicialização, o aplicativo normaliza snapshots persistidos de versões anteriores. Caso contas, categorias, lançamentos ou ajustes estejam ausentes, a aplicação utiliza valores seguros sem interromper a execução.
+O snapshot persistido foi atualizado para a versão 2. Dados da versão anterior são normalizados durante a inicialização.
