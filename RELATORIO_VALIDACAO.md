@@ -1,34 +1,33 @@
-# Relatório de Validação — Finanças em Dia 1.0.2
+# Relatório de Validação — Finanças em Dia 1.0.3
 
 Data: 13/07/2026
 
-## Correção desta versão
+## Escopo validado
 
-- Normalização automática de snapshots persistidos incompletos ou incompatíveis.
-- Proteção contra `state.categories.items` indefinido na tela de novo lançamento.
-- Fallback defensivo para contas, categorias e lançamentos nas telas e na persistência.
-- Persistência do snapshot corrigido após a hidratação.
+- Inclusão da tela visual de splash.
+- Duração mínima de 3 segundos antes da navegação principal.
+- Hidratação do estado Redux executada em paralelo com a splash.
+- Permanência da splash quando a hidratação ultrapassa o tempo mínimo.
+- Tratamento controlado de falhas de hidratação após a splash.
+- Inclusão e resolução do asset `assets/images/splash.png`.
+- Atualização do `app.json`, documentação e versão do projeto.
 
-## Validações concluídas
+## Resultados
 
-- `npm run typecheck`: aprovado com TypeScript estrito e `noUncheckedIndexedAccess`.
-- Bundle Web: aprovado.
-- Bundle Android: aprovado.
-- Bundle iOS: aprovado.
-- `package-lock.json`: sem referências a registros internos.
-- Registro público `https://registry.npmjs.org/`: 544 referências.
+| Verificação | Resultado |
+|---|---|
+| TypeScript estrito (`tsc --noEmit`) | Aprovado |
+| Bundle Web | Aprovado |
+| Bundle Android | Aprovado |
+| Bundle iOS | Aprovado |
+| Inclusão da imagem no bundle Web | Aprovado |
+| Inclusão da imagem no bundle Android | Aprovado |
+| Inclusão da imagem no bundle iOS | Aprovado |
+| Manifesto SHA-256 | Atualizado |
 
-## Auditoria npm
+## Observações
 
-- Críticas: 0
-- Altas: 0
-- Moderadas: 10
-- Baixas: 0
-
-Os alertas moderados são transitivos do toolchain do Expo/CLI. O `npm audit fix --force` não foi aplicado porque pode introduzir versões incompatíveis.
-
-## Persistência validada por bundle
-
-- Web carrega somente o adaptador AsyncStorage.
-- Android e iOS carregam o adaptador SQLite.
-- A normalização é executada antes da hidratação do Redux em todas as plataformas.
+- A splash permanece visível por no mínimo 3 segundos.
+- Se a leitura ou normalização dos dados locais exigir mais tempo, a splash permanece até o bootstrap concluir.
+- A imagem usa `resizeMode="cover"`; pequenas áreas das bordas podem ser cortadas conforme a proporção da tela.
+- Alterações em imagens ou configurações nativas de splash exigem um novo build EAS para aparecerem no APK/AAB.

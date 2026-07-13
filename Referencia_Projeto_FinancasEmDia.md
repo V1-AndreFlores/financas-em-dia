@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
 Última atualização: 13/07/2026  
-Versão da referência: 1.0.2
+Versão da referência: 1.0.3
 
 ## 1. Identidade
 
@@ -66,10 +66,14 @@ Abas inferiores:
 - Contas e categorias personalizadas são arquivadas, não removidas fisicamente.
 - Categorias e contas padrão não podem ser arquivadas pela interface atual.
 - Dados ficam somente no dispositivo nesta versão.
+- A tela de splash é exibida por no mínimo 3 segundos antes da navegação principal.
+- A hidratação local é executada durante a exibição da splash.
+- Se a hidratação ultrapassar 3 segundos, a splash permanece até a conclusão ou falha controlada do bootstrap.
 
 ## 6. Estrutura principal de arquivos
 
-- `App.tsx`: bootstrap, hidratação e composição global.
+- `App.tsx`: bootstrap, hidratação, controle do tempo da splash e composição global.
+- `assets/images/splash.png`: arte vertical exibida na inicialização.
 - `src/application/navigation/AppNavigator.tsx`: abas inferiores.
 - `src/application/store/index.ts`: Redux Store e persistência automática.
 - `src/domain/entities/*`: entidades do domínio.
@@ -79,7 +83,8 @@ Abas inferiores:
 - `src/infrastructure/seed/normalizeAppSnapshot.ts`: normalização e recuperação de snapshots persistidos incompletos.
 - `src/features/*`: slices Redux.
 - `src/presentation/components/*`: componentes reutilizáveis.
-- `src/presentation/screens/*`: telas.
+- `src/presentation/screens/AppSplashScreen.tsx`: tela visual de inicialização.
+- `src/presentation/screens/*`: demais telas.
 - `src/presentation/theme/*`: temas claro e escuro.
 - `src/shared/utils/*`: moeda, datas, IDs e período financeiro.
 - `MANIFESTO_PROJETO.json`: relação de arquivos e hashes SHA-256 da baseline.
@@ -99,15 +104,24 @@ Abas inferiores:
 - Tema claro, escuro e do sistema.
 - Configuração do dia inicial do ciclo.
 - Redefinição dos dados locais.
+- Tela de splash com arte própria e duração mínima de 3 segundos.
 
+## 8. Correções e evoluções registradas
 
-## 8. Correções registradas
+### Versão 1.0.3
+
+- Criada `AppSplashScreen.tsx` para exibir a arte de abertura em Android, iOS e Web.
+- Adicionada a imagem `assets/images/splash.png`.
+- O bootstrap agora executa a hidratação dos dados em paralelo com um temporizador de 3 segundos.
+- A navegação principal só é apresentada depois do tempo mínimo da splash e da conclusão da hidratação.
+- Em caso de falha na hidratação, a splash é encerrada após o tempo mínimo e a mensagem controlada de erro é apresentada.
+- O `app.json` foi atualizado para usar a mesma imagem como splash nativa inicial e preservar o identificador do projeto EAS.
 
 ### Versão 1.0.2
 
 - Corrigido erro em `AddTransactionScreen` ao acessar `state.categories.items` quando um snapshot persistido estava incompleto ou incompatível.
-- A hidratação agora normaliza os dados carregados antes de enviá-los aos slices Redux.
-- Arrays ausentes de contas, categorias ou lançamentos passam a receber valores seguros.
+- A hidratação normaliza os dados carregados antes de enviá-los aos slices Redux.
+- Arrays ausentes de contas, categorias ou lançamentos recebem valores seguros.
 - Ajustes inválidos do ciclo financeiro e tema são substituídos pelos valores padrão.
 - Seletores das telas receberam fallback defensivo para evitar falhas durante Fast Refresh ou estados incompletos em desenvolvimento.
 - O snapshot normalizado é salvo novamente após a hidratação.

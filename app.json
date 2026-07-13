@@ -2,14 +2,14 @@
   "expo": {
     "name": "Finanças em Dia",
     "slug": "financas-em-dia",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#164A6B"
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#031B5C"
     },
     "ios": {
       "supportsTablet": true,
@@ -32,6 +32,11 @@
     "plugins": [
       "expo-sqlite",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "16523fe3-ab14-44bb-bd05-d7d1b65b9a03"
+      }
+    }
   }
 }

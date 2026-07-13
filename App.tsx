@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -7,8 +7,9 @@ import { StatusBar } from 'expo-status-bar';
 import { AppNavigator } from './src/application/navigation/AppNavigator';
 import { appDataRepository } from './src/infrastructure/persistence/appDataRepository';
 import { normalizeAppSnapshot } from './src/infrastructure/seed/normalizeAppSnapshot';
-import { AppThemeProvider, useAppTheme } from './src/presentation/theme/AppThemeProvider';
 import { AppText } from './src/presentation/components/AppText';
+import { AppSplashScreen } from './src/presentation/screens/AppSplashScreen';
+import { AppThemeProvider, useAppTheme } from './src/presentation/theme/AppThemeProvider';
 import { store } from './src/application/store';
 import { useAppDispatch, useAppSelector } from './src/application/store/hooks';
 import { accountsReplaced } from './src/features/accounts/accountsSlice';
@@ -17,11 +18,24 @@ import { categoriesReplaced } from './src/features/categories/categoriesSlice';
 import { settingsReplaced } from './src/features/settings/settingsSlice';
 import { transactionsReplaced } from './src/features/transactions/transactionsSlice';
 
+const SPLASH_DURATION_MS = 3_000;
+
 function BootstrapContent() {
   const dispatch = useAppDispatch();
   const isHydrated = useAppSelector((state) => state.app.isHydrated);
   const hydrationError = useAppSelector((state) => state.app.hydrationError);
   const { theme, resolvedMode } = useAppTheme();
+  const [hasSplashDurationElapsed, setHasSplashDurationElapsed] = useState(false);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setHasSplashDurationElapsed(true);
+    }, SPLASH_DURATION_MS);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -58,6 +72,12 @@ function BootstrapContent() {
       isMounted = false;
     };
   }, [dispatch]);
+
+  const hasFinishedBootstrap = isHydrated || hydrationError !== null;
+
+  if (!hasSplashDurationElapsed || !hasFinishedBootstrap) {
+    return <AppSplashScreen />;
+  }
 
   if (!isHydrated) {
     return (

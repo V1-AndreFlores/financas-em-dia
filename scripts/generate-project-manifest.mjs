@@ -9,6 +9,7 @@ const ignoredDirectories = new Set([
   '.expo',
   'node_modules',
   'dist',
+  'dist-web',
   'dist-android',
   'dist-ios',
 ]);
@@ -48,7 +49,7 @@ async function collectFiles(directory) {
 const files = (await collectFiles(root)).sort((a, b) => a.path.localeCompare(b.path));
 const manifest = {
   project: 'Finanças em Dia',
-  baselineVersion: '1.0.2',
+  baselineVersion: '1.0.3',
   generatedAt: new Date().toISOString(),
   algorithm: 'SHA-256',
   fileCount: files.length,

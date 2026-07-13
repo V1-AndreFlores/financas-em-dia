@@ -1,9 +1,9 @@
 {
   "project": "Finanças em Dia",
-  "baselineVersion": "1.0.2",
-  "generatedAt": "2026-07-13T17:18:34.085Z",
+  "baselineVersion": "1.0.3",
+  "generatedAt": "2026-07-13T18:19:24.817Z",
   "algorithm": "SHA-256",
-  "fileCount": 66,
+  "fileCount": 64,
   "files": [
     {
       "path": ".gitignore",
@@ -12,13 +12,13 @@
     },
     {
       "path": "app.json",
-      "size": 994,
-      "sha256": "3b2bd662a1ec142af9c8ab6357f1365fa70d13346a91f5e9549537363b3623ce"
+      "size": 1099,
+      "sha256": "b36bdb37b596e49a0399d398e8a993fb13b107c732dec5da3ba4461f69bf6c02"
     },
     {
       "path": "App.tsx",
-      "size": 3376,
-      "sha256": "a654667df499d10672d4a72a76437903362e20387012b857337ccdcc6b13c310"
+      "size": 3949,
+      "sha256": "4d3ffd4e458936cb00ff6749b09398fae7d196d17ce81ec6e895c3460ff477e1"
     },
     {
       "path": "assets/android-icon-background.png",
@@ -46,29 +46,14 @@
       "sha256": "119462bb78eb240a65c869fc067ee599639b3cb5a41953f25c07b17d2a8c7e0f"
     },
     {
+      "path": "assets/images/splash.png",
+      "size": 1262920,
+      "sha256": "6e629b8758951b5244b57d31ea53f7aa29c22bc6805a710e1b55b3e16b0ba46a"
+    },
+    {
       "path": "assets/splash-icon.png",
       "size": 17547,
       "sha256": "5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8"
-    },
-    {
-      "path": "dist-web/_expo/static/js/web/index-900f37f3a2f518691db209bca9aea019.js",
-      "size": 1615501,
-      "sha256": "b645b0f7b9423174e7f087859510a6c9e497d335c8cf72f1f770be58d1e09686"
-    },
-    {
-      "path": "dist-web/favicon.ico",
-      "size": 14510,
-      "sha256": "8184b2ca6c201c87bade03c6d01497e4cd1a416046ca8a48db0ae3c3c758fc8c"
-    },
-    {
-      "path": "dist-web/index.html",
-      "size": 1221,
-      "sha256": "b267eefa1edcd68b7fed4517559ecff171b825feccaf3ef360ef224d67850827"
-    },
-    {
-      "path": "dist-web/metadata.json",
-      "size": 49,
-      "sha256": "aa5f19cc84d41c0f8c70ececb2bc82e863227ea1e121632aca879eb616056991"
     },
     {
       "path": "index.ts",
@@ -83,32 +68,32 @@
     {
       "path": "package-lock.json",
       "size": 252326,
-      "sha256": "84856c428016c4ce8b579416e99b324f9fde78294fd1f01307459aa49946ca14"
+      "sha256": "f60d842608b25349239a5d2e59c805dc33fcdf0eefca24248b67d8bffe91b7c3"
     },
     {
       "path": "package.json",
       "size": 1254,
-      "sha256": "b287dec3ffab68ea73c504811cb80a4f987ae3418e229e2efc2a8c3c261a93f4"
+      "sha256": "770dbb61c577c67b070b12801fd1020eeee7f5f006c981ec05019abd405df948"
     },
     {
       "path": "README.md",
-      "size": 1525,
-      "sha256": "b5ebc83a0b9b062c00c49692dc608854c501aeb7946697b626c2eaaa0de38a39"
+      "size": 2070,
+      "sha256": "9945e74d9d6817f2e83eef28a8849d84b0f2b58166a8e1c909c34232d62fe0fb"
     },
     {
       "path": "Referencia_Projeto_FinancasEmDia.md",
-      "size": 4907,
-      "sha256": "793a611dfe93d552b51a7fb1b7343d01a43e7a8612374f0c6d6ca23248a0e5ec"
+      "size": 6057,
+      "sha256": "105367cc3552b31b0b0992c6395e9b5e03c2c4e7006ae238c987c15fa8f42d7d"
     },
     {
       "path": "RELATORIO_VALIDACAO.md",
-      "size": 1195,
-      "sha256": "55047ef74eda9c008f507e9368224ec6de46e124267de347cb0f9909fcc01bc0"
+      "size": 1334,
+      "sha256": "933e6b87fe9415d01ce814e2798299c2452ef631262a4c7cd6f1d362da5c91f9"
     },
     {
       "path": "scripts/generate-project-manifest.mjs",
-      "size": 1561,
-      "sha256": "00034e1cd5e7cd7537fd76c972d22fb9dce5296c399ec7daebd9c40c565f9c0c"
+      "size": 1575,
+      "sha256": "c82bf9ff75d1019de9d0493f43fe940f59ea1a511bf0f8be9aebf75aba181848"
     },
     {
       "path": "src/application/navigation/AppNavigator.tsx",
@@ -274,6 +259,11 @@
       "path": "src/presentation/screens/AddTransactionScreen.tsx",
       "size": 6701,
       "sha256": "5715409e9e0a78a7f501e50b260f31ac3f422764c77210ede186798342290ab6"
+    },
+    {
+      "path": "src/presentation/screens/AppSplashScreen.tsx",
+      "size": 742,
+      "sha256": "307889a75112d83049ae59d4651536b86cef5de0191c2766f63a302a2e6f8754"
     },
     {
       "path": "src/presentation/screens/HomeScreen.tsx",
