@@ -1,6 +1,6 @@
 # Finanças em Dia
 
-Versão atual: **1.0.4**
+Versão atual: **1.0.5**
 
 Aplicativo mobile e web para controle financeiro pessoal, construído com React Native, Expo e TypeScript.
 
@@ -52,6 +52,16 @@ Os dados são persistidos automaticamente após alterações no Redux.
 - A configuração nativa inicial está registrada no `app.json` para evitar uma transição visual brusca.
 - Três pontos animados são exibidos abaixo do texto “Controle financeiro pessoal” durante o carregamento.
 
+## Modais e diálogos
+
+- Os alertas nativos do Android foram substituídos por componentes visuais próprios.
+- Menus de ações usam um painel inferior, mais acessível no uso com uma mão.
+- Confirmações destrutivas usam diálogo centralizado e botão vermelho.
+- A opção de cancelamento permanece secundária e sem destaque excessivo.
+- O painel de ações pode ser fechado tocando fora; confirmações destrutivas exigem uma escolha explícita.
+- A entrada e a saída usam animações suaves de opacidade, deslocamento e escala.
+- Os componentes reutilizáveis são `AppModal`, `AppActionSheet` e `AppDialog`.
+
 ## Funcionalidades desta entrega
 
 - Resumo financeiro por ciclo
@@ -65,6 +75,7 @@ Os dados são persistidos automaticamente após alterações no Redux.
 - Configuração do início do ciclo entre os dias 1 e 28
 - Exclusão e redefinição dos dados locais
 - Tela de splash com duração mínima de 3 segundos e indicador animado de três pontos
+- Modais personalizados para ações, validações, confirmações e mensagens de sucesso
 
 ## Escopo posterior
 

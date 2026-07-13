@@ -1,9 +1,9 @@
 {
   "project": "Finanças em Dia",
-  "baselineVersion": "1.0.4",
-  "generatedAt": "2026-07-13T18:48:00.941Z",
+  "baselineVersion": "1.0.5",
+  "generatedAt": "2026-07-13T19:25:50.985Z",
   "algorithm": "SHA-256",
-  "fileCount": 64,
+  "fileCount": 67,
   "files": [
     {
       "path": ".gitignore",
@@ -13,7 +13,7 @@
     {
       "path": "app.json",
       "size": 1099,
-      "sha256": "ca674e4fe7e69dfa98298e185d473545f564b5a38e60f1f9e2a3362e3208d451"
+      "sha256": "87f1eb9ac6a03821a3a07296b66be00cd5ca4d6a0e00608a3264c6feef884767"
     },
     {
       "path": "App.tsx",
@@ -68,32 +68,32 @@
     {
       "path": "package-lock.json",
       "size": 252326,
-      "sha256": "c7ad72a2687bfe31b45ce7e6629b1aeca21cf7b4b83621f213b1f8399b928fdb"
+      "sha256": "8a0a47eaa7e070b08a05a4695baf3a30e55bdd5e81bfaabd1c0ba61f98db7c28"
     },
     {
       "path": "package.json",
       "size": 1254,
-      "sha256": "9628a9a9f3aaeb9cace2cd68c822b0e64cd87111949e775523d57bdde71fa7b2"
+      "sha256": "9aaebdfec0549eeebaecd56fcc9f7b47643785f61fb3cdfcf95d280e122c4de1"
     },
     {
       "path": "README.md",
-      "size": 2218,
-      "sha256": "01c9f7f0eef659184ef24cee4dd5e2493c6cf596d904b62129c97859b0c41662"
+      "size": 2927,
+      "sha256": "df29b53696064515ef1440f947e253d6f4a31449057ecb066f3b531163a0b0c4"
     },
     {
       "path": "Referencia_Projeto_FinancasEmDia.md",
-      "size": 6842,
-      "sha256": "d7aadeef5827ea4c2ed5d1649b556b320ee9a4f8f80bdec5d378b4e1c4e3e4d8"
+      "size": 8723,
+      "sha256": "cbc80998f27e2564283e45a20d5bc22876c7090d3b1ff589f236ca61e7729b05"
     },
     {
       "path": "RELATORIO_VALIDACAO.md",
-      "size": 1271,
-      "sha256": "3f3e096f0afafcdc51ff097d60c431cc4d8d92351141758f7cfbae9d4b130ff1"
+      "size": 1928,
+      "sha256": "207fe0523e5bb42d843f6ea399c10df635e3391c382f4100b2a4f3c9b8e4703e"
     },
     {
       "path": "scripts/generate-project-manifest.mjs",
       "size": 1575,
-      "sha256": "59005c44bde5fb25e5cb8d00d94ef2f7e5dcb432e6bbe259880c266fc304e077"
+      "sha256": "7e02e62ab9f0a12c5cb34b48d320d551c6a172b903a1f2f1ea3fe7e52341151d"
     },
     {
       "path": "src/application/navigation/AppNavigator.tsx",
@@ -196,6 +196,11 @@
       "sha256": "add0ed6f69b577b7db8ec7af7560f6656e3667f75bff68b4e6e4ca2f08ca58d4"
     },
     {
+      "path": "src/presentation/components/AppActionSheet.tsx",
+      "size": 2492,
+      "sha256": "f45e05817e3aeef663c7f453fbf6599bc36001a7efa5277e1fc4c65dd58874ef"
+    },
+    {
       "path": "src/presentation/components/AppButton.tsx",
       "size": 2116,
       "sha256": "d939e07d79eb52a029b53218aa951a519bfc4b93bac0b75e60dbff3e68bf07d2"
@@ -206,9 +211,19 @@
       "sha256": "f0759633977ab832290a336161308ccc791cc8b027e3bd1e66ded5721a744afa"
     },
     {
+      "path": "src/presentation/components/AppDialog.tsx",
+      "size": 1724,
+      "sha256": "155729ca89f99566836c78f50cf8d12414b9b6999e6fb1d35270f28416eded2d"
+    },
+    {
       "path": "src/presentation/components/AppHeader.tsx",
       "size": 1008,
       "sha256": "f803fa989605baf1666cc0f201ce8302c306183d91287dcf0d41195e0f1cdcd5"
+    },
+    {
+      "path": "src/presentation/components/AppModal.tsx",
+      "size": 4419,
+      "sha256": "90531b503829106beb451dcec88195b1eeaa1ab91b78a217d50b337a335b4c1a"
     },
     {
       "path": "src/presentation/components/AppScreen.tsx",
@@ -257,8 +272,8 @@
     },
     {
       "path": "src/presentation/screens/AddTransactionScreen.tsx",
-      "size": 6701,
-      "sha256": "5715409e9e0a78a7f501e50b260f31ac3f422764c77210ede186798342290ab6"
+      "size": 7994,
+      "sha256": "1a9e90d9de3e176e99e93dd00a7de648b895f739bde4eaa14709e19637565e9a"
     },
     {
       "path": "src/presentation/screens/AppSplashScreen.tsx",
@@ -277,13 +292,13 @@
     },
     {
       "path": "src/presentation/screens/SettingsScreen.tsx",
-      "size": 9870,
-      "sha256": "037b13c4b3462b39ddd8f8ea7c196e9cd5e7dee80335534e43e158b024199205"
+      "size": 12211,
+      "sha256": "367ec8f3225e95c9c041095da59ad61186e907b122de0045c2d1fa757402a28c"
     },
     {
       "path": "src/presentation/screens/TransactionsScreen.tsx",
-      "size": 5071,
-      "sha256": "50c008649fa90a599fe3e73d8c1e533f8759b4fe92376877d30cb4b8079a534c"
+      "size": 7490,
+      "sha256": "c445166b513770f5cdaf1d7cc520945a97c33b79d407ef2dff77b61dba5ba7f2"
     },
     {
       "path": "src/presentation/theme/AppThemeProvider.tsx",

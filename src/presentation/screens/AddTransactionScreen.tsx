@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../application/store/hooks';
 import type {
@@ -15,6 +15,7 @@ import {
 } from '../../shared/utils/date';
 import { AppButton } from '../components/AppButton';
 import { AppCard } from '../components/AppCard';
+import { AppDialog } from '../components/AppDialog';
 import { AppHeader } from '../components/AppHeader';
 import { AppScreen } from '../components/AppScreen';
 import { AppText } from '../components/AppText';
@@ -22,6 +23,12 @@ import { FilterChip } from '../components/FilterChip';
 import { FormTextInput } from '../components/FormTextInput';
 import { MoneyInput } from '../components/MoneyInput';
 import { SectionTitle } from '../components/SectionTitle';
+
+interface FeedbackDialogState {
+  title: string;
+  message: string;
+  actionTitle?: string;
+}
 
 export function AddTransactionScreen() {
   const dispatch = useAppDispatch();
@@ -40,6 +47,8 @@ export function AddTransactionScreen() {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? '');
   const [status, setStatus] = useState<TransactionStatus>('paid');
   const [notes, setNotes] = useState('');
+  const [feedbackDialog, setFeedbackDialog] =
+    useState<FeedbackDialogState | null>(null);
 
   const availableCategories = useMemo(
     () =>
@@ -69,27 +78,47 @@ export function AddTransactionScreen() {
     const isoDate = brDateToIso(date);
 
     if (!normalizedDescription) {
-      Alert.alert('Descrição obrigatória', 'Informe uma descrição para o lançamento.');
+      setFeedbackDialog({
+        title: 'Descrição obrigatória',
+        message: 'Informe uma descrição para o lançamento.',
+        actionTitle: 'Corrigir',
+      });
       return;
     }
 
     if (amountInCents <= 0) {
-      Alert.alert('Valor inválido', 'Informe um valor maior que zero.');
+      setFeedbackDialog({
+        title: 'Valor inválido',
+        message: 'Informe um valor maior que zero.',
+        actionTitle: 'Corrigir',
+      });
       return;
     }
 
     if (!isoDate) {
-      Alert.alert('Data inválida', 'Use o formato dd/MM/aaaa.');
+      setFeedbackDialog({
+        title: 'Data inválida',
+        message: 'Use o formato dd/MM/aaaa.',
+        actionTitle: 'Corrigir',
+      });
       return;
     }
 
     if (!categoryId) {
-      Alert.alert('Categoria obrigatória', 'Selecione uma categoria.');
+      setFeedbackDialog({
+        title: 'Categoria obrigatória',
+        message: 'Selecione uma categoria.',
+        actionTitle: 'Corrigir',
+      });
       return;
     }
 
     if (!accountId) {
-      Alert.alert('Conta obrigatória', 'Selecione uma conta ou carteira.');
+      setFeedbackDialog({
+        title: 'Conta obrigatória',
+        message: 'Selecione uma conta ou carteira.',
+        actionTitle: 'Corrigir',
+      });
       return;
     }
 
@@ -111,111 +140,130 @@ export function AddTransactionScreen() {
       }),
     );
 
-    Alert.alert('Lançamento salvo', 'Os dados foram registrados no dispositivo.');
     resetForm();
+    setFeedbackDialog({
+      title: 'Lançamento salvo',
+      message: 'Os dados foram registrados no dispositivo.',
+      actionTitle: 'Continuar',
+    });
   };
 
   return (
-    <AppScreen>
-      <AppHeader
-        title="Novo lançamento"
-        subtitle="Registre uma receita ou despesa de forma rápida."
+    <>
+      <AppScreen>
+        <AppHeader
+          title="Novo lançamento"
+          subtitle="Registre uma receita ou despesa de forma rápida."
+        />
+
+        <AppCard>
+          <SectionTitle title="Tipo" />
+          <View style={styles.chips}>
+            <FilterChip
+              label="Despesa"
+              selected={type === 'expense'}
+              onPress={() => changeType('expense')}
+            />
+            <FilterChip
+              label="Receita"
+              selected={type === 'income'}
+              onPress={() => changeType('income')}
+            />
+          </View>
+
+          <FormTextInput
+            label="Descrição"
+            maxLength={80}
+            onChangeText={setDescription}
+            placeholder={type === 'expense' ? 'Ex.: Supermercado' : 'Ex.: Salário'}
+            value={description}
+          />
+
+          <MoneyInput
+            label="Valor"
+            valueInCents={amountInCents}
+            onChangeValue={setAmountInCents}
+          />
+
+          <FormTextInput
+            label="Data"
+            keyboardType="numeric"
+            maxLength={10}
+            onChangeText={setDate}
+            placeholder="dd/MM/aaaa"
+            value={date}
+          />
+
+          <SectionTitle title="Categoria" />
+          <View style={styles.chips}>
+            {availableCategories.map((category) => (
+              <FilterChip
+                key={category.id}
+                label={category.name}
+                selected={categoryId === category.id}
+                onPress={() => setCategoryId(category.id)}
+              />
+            ))}
+          </View>
+
+          <SectionTitle title="Conta ou carteira" />
+          <View style={styles.chips}>
+            {accounts.map((account) => (
+              <FilterChip
+                key={account.id}
+                label={account.name}
+                selected={accountId === account.id}
+                onPress={() => setAccountId(account.id)}
+              />
+            ))}
+          </View>
+
+          <SectionTitle title="Situação" />
+          <View style={styles.chips}>
+            <FilterChip
+              label="Efetivado"
+              selected={status === 'paid'}
+              onPress={() => setStatus('paid')}
+            />
+            <FilterChip
+              label="Pendente"
+              selected={status === 'pending'}
+              onPress={() => setStatus('pending')}
+            />
+          </View>
+
+          <FormTextInput
+            label="Observação (opcional)"
+            maxLength={250}
+            multiline
+            numberOfLines={3}
+            onChangeText={setNotes}
+            placeholder="Informações adicionais"
+            style={styles.notes}
+            value={notes}
+          />
+
+          <AppText variant="caption" color="muted" style={styles.help}>
+            Todos os dados ficam armazenados localmente. A sincronização em nuvem não faz parte desta versão.
+          </AppText>
+
+          <AppButton title="Salvar lançamento" onPress={save} fullWidth />
+        </AppCard>
+      </AppScreen>
+
+      <AppDialog
+        visible={feedbackDialog !== null}
+        title={feedbackDialog?.title ?? ''}
+        message={feedbackDialog?.message}
+        onRequestClose={() => setFeedbackDialog(null)}
+        actions={[
+          {
+            title: feedbackDialog?.actionTitle ?? 'Entendi',
+            onPress: () => setFeedbackDialog(null),
+          },
+        ]}
       />
-
-      <AppCard>
-        <SectionTitle title="Tipo" />
-        <View style={styles.chips}>
-          <FilterChip
-            label="Despesa"
-            selected={type === 'expense'}
-            onPress={() => changeType('expense')}
-          />
-          <FilterChip
-            label="Receita"
-            selected={type === 'income'}
-            onPress={() => changeType('income')}
-          />
-        </View>
-
-        <FormTextInput
-          label="Descrição"
-          maxLength={80}
-          onChangeText={setDescription}
-          placeholder={type === 'expense' ? 'Ex.: Supermercado' : 'Ex.: Salário'}
-          value={description}
-        />
-
-        <MoneyInput
-          label="Valor"
-          valueInCents={amountInCents}
-          onChangeValue={setAmountInCents}
-        />
-
-        <FormTextInput
-          label="Data"
-          keyboardType="numeric"
-          maxLength={10}
-          onChangeText={setDate}
-          placeholder="dd/MM/aaaa"
-          value={date}
-        />
-
-        <SectionTitle title="Categoria" />
-        <View style={styles.chips}>
-          {availableCategories.map((category) => (
-            <FilterChip
-              key={category.id}
-              label={category.name}
-              selected={categoryId === category.id}
-              onPress={() => setCategoryId(category.id)}
-            />
-          ))}
-        </View>
-
-        <SectionTitle title="Conta ou carteira" />
-        <View style={styles.chips}>
-          {accounts.map((account) => (
-            <FilterChip
-              key={account.id}
-              label={account.name}
-              selected={accountId === account.id}
-              onPress={() => setAccountId(account.id)}
-            />
-          ))}
-        </View>
-
-        <SectionTitle title="Situação" />
-        <View style={styles.chips}>
-          <FilterChip
-            label="Efetivado"
-            selected={status === 'paid'}
-            onPress={() => setStatus('paid')}
-          />
-          <FilterChip
-            label="Pendente"
-            selected={status === 'pending'}
-            onPress={() => setStatus('pending')}
-          />
-        </View>
-
-        <FormTextInput
-          label="Observação (opcional)"
-          maxLength={250}
-          multiline
-          numberOfLines={3}
-          onChangeText={setNotes}
-          placeholder="Informações adicionais"
-          style={styles.notes}
-          value={notes}
-        />
-
-        <AppText variant="caption" color="muted" style={styles.help}>
-          Todos os dados ficam armazenados localmente. A sincronização em nuvem não faz parte desta versão.
-        </AppText>
-
-        <AppButton title="Salvar lançamento" onPress={save} fullWidth />
-      </AppCard>
-    </AppScreen>
+    </>
   );
 }
 

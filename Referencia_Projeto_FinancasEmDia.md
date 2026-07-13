@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
 Última atualização: 13/07/2026  
-Versão da referência: 1.0.4
+Versão da referência: 1.0.5
 
 ## 1. Identidade
 
@@ -70,6 +70,11 @@ Abas inferiores:
 - A hidratação local é executada durante a exibição da splash.
 - Se a hidratação ultrapassar 3 segundos, a splash permanece até a conclusão ou falha controlada do bootstrap.
 - Durante a splash, três pontos verdes são animados sequencialmente abaixo do texto “Controle financeiro pessoal”.
+- Alertas nativos não devem ser usados para fluxos de interação do usuário; utilizar os componentes visuais próprios.
+- Menus de ações usam painel inferior e podem ser fechados pelo fundo.
+- Confirmações destrutivas usam diálogo centralizado, não fecham ao tocar fora e sempre apresentam uma ação de cancelamento.
+- Ações destrutivas usam botão vermelho preenchido; cancelar usa botão secundário sem destaque excessivo.
+- Os modais não usam ícones nas ações.
 
 ## 6. Estrutura principal de arquivos
 
@@ -84,6 +89,9 @@ Abas inferiores:
 - `src/infrastructure/seed/normalizeAppSnapshot.ts`: normalização e recuperação de snapshots persistidos incompletos.
 - `src/features/*`: slices Redux.
 - `src/presentation/components/*`: componentes reutilizáveis.
+- `src/presentation/components/AppModal.tsx`: base animada para modais centralizados e painéis inferiores.
+- `src/presentation/components/AppActionSheet.tsx`: painel inferior para listas de ações.
+- `src/presentation/components/AppDialog.tsx`: diálogo centralizado para validações, mensagens e confirmações.
 - `src/presentation/screens/AppSplashScreen.tsx`: tela visual de inicialização.
 - `src/presentation/screens/*`: demais telas.
 - `src/presentation/theme/*`: temas claro e escuro.
@@ -106,8 +114,23 @@ Abas inferiores:
 - Configuração do dia inicial do ciclo.
 - Redefinição dos dados locais.
 - Tela de splash com arte própria, duração mínima de 3 segundos e indicador animado de três pontos.
+- Modais personalizados e consistentes com os temas claro e escuro.
+- Painel inferior para ações de lançamentos.
+- Segundo diálogo de confirmação antes da exclusão definitiva de lançamentos e da redefinição dos dados.
 
 ## 8. Correções e evoluções registradas
+
+### Versão 1.0.5
+
+- Criados `AppModal`, `AppActionSheet` e `AppDialog` como componentes reutilizáveis.
+- Substituídos todos os `Alert.alert` das telas de lançamentos, novo lançamento e ajustes.
+- As ações de um lançamento agora são exibidas em painel inferior com identidade visual do aplicativo.
+- A exclusão de lançamento abre um segundo diálogo centralizado de confirmação.
+- A redefinição completa dos dados também exige confirmação destrutiva centralizada.
+- Validações e mensagens de sucesso usam diálogos próprios, compatíveis com tema claro e escuro.
+- Ações destrutivas usam botão vermelho; cancelar usa botão secundário sem ícones.
+- O painel de ações fecha ao tocar fora; confirmações destrutivas não fecham pelo fundo.
+- Adicionadas animações suaves de entrada e saída com `Animated` e `useNativeDriver`.
 
 ### Versão 1.0.4
 

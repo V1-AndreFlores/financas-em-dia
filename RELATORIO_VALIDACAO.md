@@ -1,15 +1,18 @@
-# Relatório de Validação — Finanças em Dia 1.0.4
+# Relatório de Validação — Finanças em Dia 1.0.5
 
 Data: 13/07/2026
 
 ## Escopo validado
 
-- Inclusão de três pontos animados na tela visual de splash.
-- Posicionamento do indicador abaixo do texto “Controle financeiro pessoal”.
-- Animação sequencial de opacidade e escala usando o driver nativo.
-- Preservação da duração mínima de 3 segundos e da hidratação em paralelo.
-- Atualização da documentação, versão e manifesto do projeto.
-- Geração de pacote incremental contendo apenas os arquivos modificados.
+- Criação de base reutilizável para modais e diálogos.
+- Substituição dos alertas nativos nas telas de lançamentos, novo lançamento e ajustes.
+- Painel inferior para ações de lançamento.
+- Diálogos centralizados para validações, sucesso e confirmações destrutivas.
+- Confirmação adicional antes de excluir lançamento ou redefinir todos os dados.
+- Compatibilidade visual com os temas claro e escuro.
+- Animações de entrada e saída.
+- Atualização da versão, documentação e manifesto.
+- Geração de pacote incremental com somente os arquivos modificados.
 
 ## Resultados
 
@@ -19,13 +22,23 @@ Data: 13/07/2026
 | Bundle Web | Aprovado |
 | Bundle Android | Aprovado |
 | Bundle iOS | Aprovado |
-| Inicialização e encerramento da animação | Aprovado |
+| Ausência de `Alert.alert` nas telas | Aprovado |
+| Confirmação destrutiva em segundo diálogo | Aprovado |
+| Compatibilidade com tema claro e escuro | Aprovado |
 | Manifesto SHA-256 | Atualizado |
 | Integridade do ZIP incremental | Aprovado |
 
+## Decisões de experiência
+
+- Ações comuns são apresentadas em painel inferior por serem mais acessíveis no uso mobile.
+- Confirmações destrutivas permanecem centralizadas para concentrar a atenção.
+- O painel inferior fecha ao tocar fora.
+- Confirmações destrutivas não fecham pelo fundo, mas podem ser canceladas pelo botão explícito ou pelo botão voltar do Android.
+- A opção de cancelar usa estilo secundário, sem competir com a ação principal.
+- Não foram adicionados ícones aos botões dos modais.
+
 ## Observações
 
-- A imagem `assets/images/splash.png` não foi modificada.
-- Os pontos são renderizados como elementos da interface sobre a arte, permitindo animação real.
-- A splash permanece visível por no mínimo 3 segundos e continua aguardando a hidratação quando necessário.
-- O pacote incremental preserva a pasta raiz `financas-em-dia`, permitindo extração direta dentro de `D:\Projects`.
+- Nenhuma dependência externa foi adicionada.
+- Os componentes usam apenas APIs do React Native e `react-native-safe-area-context`, já presente no projeto.
+- O pacote incremental preserva a pasta raiz `financas-em-dia`, permitindo extração direta em `D:\Projects`.
