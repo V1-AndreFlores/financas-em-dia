@@ -49,7 +49,7 @@ async function collectFiles(directory) {
 const files = (await collectFiles(root)).sort((a, b) => a.path.localeCompare(b.path));
 const manifest = {
   project: 'Finanças em Dia',
-  baselineVersion: '1.1.2',
+  baselineVersion: '1.1.3',
   generatedAt: new Date().toISOString(),
   algorithm: 'SHA-256',
   fileCount: files.length,

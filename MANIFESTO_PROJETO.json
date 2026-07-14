@@ -1,7 +1,7 @@
 {
   "project": "Finanças em Dia",
-  "baselineVersion": "1.1.2",
-  "generatedAt": "2026-07-14T00:03:07.456Z",
+  "baselineVersion": "1.1.3",
+  "generatedAt": "2026-07-14T02:05:27.092Z",
   "algorithm": "SHA-256",
   "fileCount": 82,
   "files": [
@@ -13,7 +13,7 @@
     {
       "path": "app.json",
       "size": 1607,
-      "sha256": "f9e699938040f28b5d4f52d00eeee9e1bcbb07ca96249c38c22cb7c29b27d979"
+      "sha256": "8b94a963330ae27d94ee0ea6e593ff8b3af30a1c8cca4b33175d063daab174ef"
     },
     {
       "path": "App.tsx",
@@ -68,32 +68,32 @@
     {
       "path": "package-lock.json",
       "size": 254879,
-      "sha256": "6536d9ac42e3adc379415bf6bb475b6e0a03c8bbd75a1f5db9cf149e6289a36a"
+      "sha256": "e41a87d69eee18d5b3a44818945d241fbc9c21598f79fd6ee1624695ad652eb5"
     },
     {
       "path": "package.json",
       "size": 1401,
-      "sha256": "d325bf349034bc80eb5cc263f8b2cf9a68419cb6fdcf1b614e8ef03b0348e508"
+      "sha256": "208525c0a2305de8dcd26de90ea29afd0951aca41015abe1c03f7461aef836e1"
     },
     {
       "path": "README.md",
-      "size": 5848,
-      "sha256": "52f05b7470328d88cea01a3196c9d8cac9df7863af4a6ddd6103a68e1ce2caea"
+      "size": 5958,
+      "sha256": "4faa76f22a94740e1086fee11d4f41e62b60051060e8452df3dd12c1c039c579"
     },
     {
       "path": "Referencia_Projeto_FinancasEmDia.md",
-      "size": 10298,
-      "sha256": "4d54ebb9f142dbe23b7964b9581fa41c98807a9b606e95bf85e8bf9c132f5a8e"
+      "size": 10910,
+      "sha256": "0a22f02c88e2402bc66c348bf1d8f57c9caf9a3da7442f878faa9aa84cdf7da4"
     },
     {
       "path": "RELATORIO_VALIDACAO.md",
-      "size": 3333,
-      "sha256": "3e6f4ffdb0a06a61562eb4e8b08fe06e3e523568f6c691c1d7843d1c769c22fe"
+      "size": 2324,
+      "sha256": "dc06eaf1961d5af095aa5e337fd3f7f81c10f69b67974985bfdebb51bee28d13"
     },
     {
       "path": "scripts/generate-project-manifest.mjs",
       "size": 1575,
-      "sha256": "f10c9d2079d38789a2f4178dc922711c6c8f6703f9318bf0deca20f4792f4fff"
+      "sha256": "c7748bf47717bf84560508eebd92d519d316f46a2af6253d2bb8c025434d026c"
     },
     {
       "path": "src/application/navigation/AppNavigator.tsx",
@@ -337,8 +337,8 @@
     },
     {
       "path": "src/presentation/screens/AddTransactionScreen.tsx",
-      "size": 15671,
-      "sha256": "2d5dc92c818f8d7647f93b5b24884bc01e7523dac756a55cf3d4944f297aa5a6"
+      "size": 16165,
+      "sha256": "4df55954e1245a91026cf1efc553be6a33b65c94e5d0f85f3b3a426307d604cd"
     },
     {
       "path": "src/presentation/screens/AppLockScreen.tsx",

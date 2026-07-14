@@ -1,6 +1,6 @@
 # Finanças em Dia
 
-Versão atual: **1.1.2**
+Versão atual: **1.1.3**
 
 Aplicativo mobile e web, offline-first, para controle financeiro pessoal. Construído com React Native, Expo e TypeScript.
 
@@ -57,6 +57,7 @@ npm run typecheck
 - Tela de splash com duração mínima de 3 segundos e três pontos animados.
 - Modais próprios e consistentes com a identidade visual do aplicativo.
 - Formulários e modais ajustam a rolagem automaticamente para manter o campo ativo visível acima do teclado.
+- Seleção de categoria estabilizada no cadastro de lançamentos, inclusive após salvar uma movimentação.
 
 ## Datas
 

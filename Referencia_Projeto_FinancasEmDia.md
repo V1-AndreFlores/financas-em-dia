@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
 Última atualização: 13/07/2026  
-Versão da referência: 1.1.2
+Versão da referência: 1.1.3
 
 ## 1. Identidade
 
@@ -277,12 +277,20 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 - `AppScreen` e `AppModal` usam `KeyboardAvoidingView` com comportamento específico por plataforma.
 - Formulários de conta, categoria, lançamento, filtros e PIN usam rolagem consciente do teclado.
 
-## 18. Arquivos adicionados na versão 1.1.2
+
+## 18. Correção de seleção de categoria — versão 1.1.3
+
+- O cadastro de lançamento passa a selecionar automaticamente a primeira categoria compatível quando não houver uma seleção válida.
+- A categoria escolhida é preservada após salvar um lançamento, permitindo cadastros consecutivos sem perda de contexto.
+- As listas de contas e categorias agora são derivadas de seletores estáveis do Redux, evitando recriações desnecessárias e efeitos que poderiam limpar a seleção.
+- Ao trocar entre despesa e receita, a seleção é revalidada e substituída pela primeira categoria compatível.
+
+## 19. Arquivos adicionados na versão 1.1.2
 
 - `src/presentation/components/CategoryFormModal.tsx`
 - `src/presentation/components/KeyboardAwareScrollView.tsx`
 
-## 19. Arquivos adicionados na versão 1.1.0
+## 20. Arquivos adicionados na versão 1.1.0
 
 - `src/features/financialPeriod/financialPeriodSlice.ts`
 - `src/infrastructure/notifications/notificationService.native.ts`
@@ -297,7 +305,7 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 - `src/presentation/screens/AppLockScreen.tsx`
 - `src/shared/utils/transactionSeries.ts`
 
-## 20. Dependências nativas adicionadas
+## 21. Dependências nativas adicionadas
 
 - `expo-notifications ~57.0.3`
 - `expo-local-authentication ~57.0.0`
@@ -306,7 +314,7 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 
 Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas exigem novo build EAS.
 
-## 21. Próximos itens planejados
+## 22. Próximos itens planejados
 
 - Cartões de crédito e faturas.
 - Transferências entre contas.
@@ -315,7 +323,7 @@ Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas 
 - Exportação, backup e restauração.
 - Testes automatizados das regras financeiras.
 
-## 22. Regra permanente de entrega
+## 23. Regra permanente de entrega
 
 1. Trabalhar sobre a versão mais recente.
 2. Preservar funcionalidades existentes.

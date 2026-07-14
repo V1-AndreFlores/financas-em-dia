@@ -48,11 +48,12 @@ const frequencyLabels: Record<RecurrenceFrequency, string> = {
 
 export function AddTransactionScreen() {
   const dispatch = useAppDispatch();
-  const accounts = useAppSelector((state) =>
-    (state.accounts?.items ?? []).filter((account) => account.isActive),
-  );
-  const categories = useAppSelector((state) =>
-    (state.categories?.items ?? []).filter((category) => category.isActive),
+  const accountItems = useAppSelector((state) => state.accounts.items);
+  const categoryItems = useAppSelector((state) => state.categories.items);
+
+  const accounts = useMemo(
+    () => accountItems.filter((account) => account.isActive),
+    [accountItems],
   );
 
   const [entryMode, setEntryMode] = useState<TransactionEntryMode>('single');
@@ -77,23 +78,29 @@ export function AddTransactionScreen() {
 
   const availableCategories = useMemo(
     () =>
-      categories.filter(
-        (category) => category.type === type || category.type === 'both',
+      categoryItems.filter(
+        (category) =>
+          category.isActive &&
+          (category.type === type || category.type === 'both'),
       ),
-    [categories, type],
+    [categoryItems, type],
   );
 
   useEffect(() => {
-    if (!accounts.some((account) => account.id === accountId)) {
-      setAccountId(accounts[0]?.id ?? '');
-    }
-  }, [accountId, accounts]);
+    setAccountId((currentAccountId) =>
+      accounts.some((account) => account.id === currentAccountId)
+        ? currentAccountId
+        : (accounts[0]?.id ?? ''),
+    );
+  }, [accounts]);
 
   useEffect(() => {
-    if (!availableCategories.some((category) => category.id === categoryId)) {
-      setCategoryId('');
-    }
-  }, [availableCategories, categoryId]);
+    setCategoryId((currentCategoryId) =>
+      availableCategories.some((category) => category.id === currentCategoryId)
+        ? currentCategoryId
+        : (availableCategories[0]?.id ?? ''),
+    );
+  }, [availableCategories]);
 
   const changeType = (nextType: TransactionType) => {
     setType(nextType);
@@ -101,12 +108,21 @@ export function AddTransactionScreen() {
   };
 
   const resetForm = () => {
+    const nextCategoryId = availableCategories.some(
+      (category) => category.id === categoryId,
+    )
+      ? categoryId
+      : (availableCategories[0]?.id ?? '');
+    const nextAccountId = accounts.some((account) => account.id === accountId)
+      ? accountId
+      : (accounts[0]?.id ?? '');
+
     setEntryMode('single');
     setDescription('');
     setAmountInCents(0);
     setDate(isoDateToBr(todayIsoDate()));
-    setCategoryId('');
-    setAccountId(accounts[0]?.id ?? '');
+    setCategoryId(nextCategoryId);
+    setAccountId(nextAccountId);
     setStatus('paid');
     setNotes('');
     setRecurrenceFrequency('monthly');
