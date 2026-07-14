@@ -75,7 +75,13 @@ export function AppLockScreen({ mode, onUnlocked }: AppLockScreenProps) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={
+        Platform.OS === 'ios'
+          ? 'padding'
+          : Platform.OS === 'android'
+            ? 'height'
+            : undefined
+      }
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <View

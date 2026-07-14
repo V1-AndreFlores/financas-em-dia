@@ -18,6 +18,9 @@ interface BaseTransactionInput {
   notes?: string;
 }
 
+const OPEN_ENDED_BATCH_SIZE = 12;
+const MAX_GENERATED_PER_SYNC = 600;
+
 function createBaseTransaction(
   input: BaseTransactionInput,
   date: string,
@@ -38,7 +41,7 @@ function createBaseTransaction(
   };
 }
 
-function addRecurrenceDate(
+export function addRecurrenceDate(
   startDate: string,
   occurrenceOffset: number,
   frequency: RecurrenceFrequency,
@@ -88,8 +91,131 @@ export function createRecurringTransactions(
       current: index + 1,
       total: safeCount,
       frequency,
+      isOpenEnded: false,
+      seriesStartDate: input.date,
     },
   }));
+}
+
+export function createOpenEndedRecurringTransactions(
+  input: BaseTransactionInput,
+  frequency: RecurrenceFrequency,
+): FinancialTransaction[] {
+  const now = new Date().toISOString();
+  const groupId = createId('recurring');
+
+  return Array.from({ length: OPEN_ENDED_BATCH_SIZE }, (_, index) => ({
+    ...createBaseTransaction(
+      { ...input, status: index === 0 ? input.status : 'pending' },
+      addRecurrenceDate(input.date, index, frequency),
+      now,
+    ),
+    entryMode: 'recurring' as const,
+    recurring: {
+      groupId,
+      current: index + 1,
+      total: null,
+      frequency,
+      isOpenEnded: true,
+      seriesStartDate: input.date,
+    },
+  }));
+}
+
+export function extendOpenEndedRecurringTransactions(
+  transactions: FinancialTransaction[],
+  targetDate: string,
+): FinancialTransaction[] {
+  const groups = new Map<string, FinancialTransaction[]>();
+
+  transactions.forEach((transaction) => {
+    if (!transaction.recurring?.isOpenEnded || transaction.recurring.total !== null) {
+      return;
+    }
+
+    const group = groups.get(transaction.recurring.groupId) ?? [];
+    group.push(transaction);
+    groups.set(transaction.recurring.groupId, group);
+  });
+
+  const generated: FinancialTransaction[] = [];
+  const now = new Date().toISOString();
+
+  groups.forEach((group) => {
+    const ordered = [...group].sort((a, b) => {
+      const byOccurrence =
+        (a.recurring?.current ?? 0) - (b.recurring?.current ?? 0);
+      return byOccurrence !== 0 ? byOccurrence : a.date.localeCompare(b.date);
+    });
+    let latest: FinancialTransaction | undefined = ordered.at(-1);
+
+    if (!latest?.recurring || latest.date >= targetDate) {
+      return;
+    }
+
+    const excludedOccurrences = new Set(
+      ordered.flatMap((item) => item.recurring?.excludedOccurrences ?? []),
+    );
+    let generatedForGroup = 0;
+
+    while (
+      latest &&
+      latest.date < targetDate &&
+      generatedForGroup < MAX_GENERATED_PER_SYNC
+    ) {
+      const batchStart: FinancialTransaction = latest;
+
+      for (
+        let offset = 1;
+        offset <= OPEN_ENDED_BATCH_SIZE && generatedForGroup < MAX_GENERATED_PER_SYNC;
+        offset += 1
+      ) {
+        const current = (batchStart.recurring?.current ?? 0) + offset;
+        const date = addRecurrenceDate(
+          batchStart.date,
+          offset,
+          batchStart.recurring?.frequency ?? 'monthly',
+        );
+
+        if (excludedOccurrences.has(current)) {
+          latest = {
+            ...batchStart,
+            date,
+            recurring: {
+              ...batchStart.recurring!,
+              current,
+            },
+          };
+          continue;
+        }
+
+        const next: FinancialTransaction = {
+          ...batchStart,
+          id: createId('transaction'),
+          date,
+          status: 'pending',
+          createdAt: now,
+          updatedAt: now,
+          recurring: {
+            ...batchStart.recurring!,
+            current,
+            total: null,
+            isOpenEnded: true,
+            excludedOccurrences:
+              excludedOccurrences.size > 0
+                ? [...excludedOccurrences].sort((a, b) => a - b)
+                : undefined,
+          },
+        };
+
+        generated.push(next);
+        latest = next;
+        generatedForGroup += 1;
+      }
+    }
+  });
+
+  return generated;
 }
 
 export function createInstallmentTransactions(
@@ -130,7 +256,9 @@ export function getTransactionSeriesLabel(
   }
 
   if (transaction.recurring) {
-    return `Recorrente ${transaction.recurring.current}/${transaction.recurring.total}`;
+    return transaction.recurring.isOpenEnded || transaction.recurring.total === null
+      ? `Recorrente ${transaction.recurring.current} · sem término`
+      : `Recorrente ${transaction.recurring.current}/${transaction.recurring.total}`;
   }
 
   return null;

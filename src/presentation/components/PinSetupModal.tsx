@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppButton } from './AppButton';
 import { AppModal } from './AppModal';
+import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 import { AppText } from './AppText';
 import { FormTextInput } from './FormTextInput';
 import { useAppTheme } from '../theme/AppThemeProvider';
@@ -72,40 +73,42 @@ export function PinSetupModal({
         Use de 4 a 6 números. O PIN será solicitado ao abrir ou retornar ao aplicativo.
       </AppText>
 
-      <FormTextInput
-        label="Novo PIN"
-        keyboardType="number-pad"
-        maxLength={6}
-        onChangeText={(value) => setPin(value.replace(/\D/g, ''))}
-        placeholder="••••"
-        secureTextEntry
-        value={pin}
-      />
-      <FormTextInput
-        label="Confirmar PIN"
-        keyboardType="number-pad"
-        maxLength={6}
-        onChangeText={(value) => setConfirmation(value.replace(/\D/g, ''))}
-        onSubmitEditing={() => void save()}
-        placeholder="••••"
-        secureTextEntry
-        value={confirmation}
-      />
+      <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
+        <FormTextInput
+          label="Novo PIN"
+          keyboardType="number-pad"
+          maxLength={6}
+          onChangeText={(value) => setPin(value.replace(/\D/g, ''))}
+          placeholder="••••"
+          secureTextEntry
+          value={pin}
+        />
+        <FormTextInput
+          label="Confirmar PIN"
+          keyboardType="number-pad"
+          maxLength={6}
+          onChangeText={(value) => setConfirmation(value.replace(/\D/g, ''))}
+          onSubmitEditing={() => void save()}
+          placeholder="••••"
+          secureTextEntry
+          value={confirmation}
+        />
 
-      <View style={styles.actions}>
-        <AppButton
-          title="Ativar PIN"
-          isLoading={isSaving}
-          onPress={() => void save()}
-          fullWidth
-        />
-        <AppButton
-          title="Cancelar"
-          variant="ghost"
-          onPress={onRequestClose}
-          fullWidth
-        />
-      </View>
+        <View style={styles.actions}>
+          <AppButton
+            title="Ativar PIN"
+            isLoading={isSaving}
+            onPress={() => void save()}
+            fullWidth
+          />
+          <AppButton
+            title="Cancelar"
+            variant="ghost"
+            onPress={onRequestClose}
+            fullWidth
+          />
+        </View>
+      </KeyboardAwareScrollView>
     </AppModal>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import type { Account } from '../../domain/entities/Account';
 import type { Category } from '../../domain/entities/Category';
@@ -14,6 +14,7 @@ import {
   isoDateToBr,
 } from '../../shared/utils/date';
 import { AppButton } from './AppButton';
+import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 import { AppModal } from './AppModal';
 import { AppText } from './AppText';
 import { DateInput } from './DateInput';
@@ -149,10 +150,7 @@ export function TransactionFormModal({
         Altere os dados desta ocorrência. Parcelas e recorrências continuam independentes.
       </AppText>
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+      <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
         <SectionTitle title="Tipo" />
         <View style={styles.chips}>
           <FilterChip
@@ -245,7 +243,7 @@ export function TransactionFormModal({
             fullWidth
           />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </AppModal>
   );
 }

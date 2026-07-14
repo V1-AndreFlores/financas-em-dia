@@ -4,7 +4,7 @@ import type { AppSettings } from './Settings';
 import type { FinancialTransaction } from './Transaction';
 
 export interface AppSnapshot {
-  version: 2;
+  version: 3;
   accounts: Account[];
   categories: Category[];
   transactions: FinancialTransaction[];

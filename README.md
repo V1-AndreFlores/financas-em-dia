@@ -1,6 +1,6 @@
 # Finanças em Dia
 
-Versão atual: **1.1.1**
+Versão atual: **1.1.2**
 
 Aplicativo mobile e web, offline-first, para controle financeiro pessoal. Construído com React Native, Expo e TypeScript.
 
@@ -40,12 +40,15 @@ npm run typecheck
 - Navegação compartilhada entre ciclos anteriores e futuros.
 - Cadastro de receitas e despesas únicas.
 - Lançamentos recorrentes com frequência semanal, quinzenal, mensal ou anual.
+- Recorrências com quantidade definida ou sem término, com geração progressiva ao consultar ciclos futuros.
 - Cada ocorrência recorrente é independente e pode ter valor, data, situação, categoria, conta e observação editados.
 - Compras parceladas com geração automática das parcelas restantes.
 - Possibilidade de iniciar um parcelamento em qualquer parcela, por exemplo, da parcela 3/10 até 10/10.
 - Edição e exclusão individual de lançamentos.
 - Filtros avançados por ciclo, período personalizado, tipo, situação, categoria, conta e faixa de valor.
-- Cadastro e edição de contas com saldo inicial e data de referência.
+- Cadastro, edição e exclusão de contas com saldo inicial e data de referência.
+- Exclusão em cascata dos lançamentos vinculados à conta, mediante confirmação.
+- Cadastro, edição e exclusão de categorias; lançamentos de categorias removidas são realocados para Outros.
 - Saldo consolidado calculado até o final do ciclo selecionado.
 - Lembretes locais para despesas pendentes.
 - Bloqueio por biometria ou PIN.
@@ -53,6 +56,7 @@ npm run typecheck
 - Campos de data com máscara automática `dd/MM/aaaa` e validação de datas reais.
 - Tela de splash com duração mínima de 3 segundos e três pontos animados.
 - Modais próprios e consistentes com a identidade visual do aplicativo.
+- Formulários e modais ajustam a rolagem automaticamente para manter o campo ativo visível acima do teclado.
 
 ## Datas
 
@@ -76,9 +80,12 @@ O aplicativo possui somente as opções **Claro** e **Escuro**:
 
 ## Recorrências
 
-Ao criar um lançamento recorrente, o aplicativo gera de 2 a 60 ocorrências. A primeira usa a situação escolhida; as futuras são criadas como pendentes.
+Ao criar um lançamento recorrente, o usuário escolhe entre:
 
-Isso permite cadastrar contas com valores variáveis, como energia elétrica: cada cobrança futura pode ser aberta na tela **Lançamentos** e editada separadamente quando o valor real for conhecido.
+- **Quantidade definida:** gera de 2 a 60 ocorrências.
+- **Sem limite:** cria inicialmente 12 ocorrências e amplia a série automaticamente quando ciclos futuros são consultados.
+
+A primeira ocorrência usa a situação escolhida; as futuras são criadas como pendentes. Cada cobrança permanece independente e pode ter valor, data, categoria, conta, situação e observação editados separadamente. Isso atende contas contínuas e variáveis, como energia elétrica, aluguel, água e condomínio.
 
 ## Parcelamentos
 
@@ -127,4 +134,16 @@ A aplicação usa uma interface de repositório única:
 - Web: `AsyncStorageAppDataRepository`
 - Android/iOS: `SQLiteAppDataRepository`
 
-O snapshot persistido usa a versão 2. Dados anteriores são normalizados durante a inicialização.
+O snapshot persistido usa a versão 3. Dados anteriores são normalizados durante a inicialização.
+
+
+## Exclusão de contas e categorias
+
+- A exclusão de uma conta exige confirmação e remove todos os lançamentos vinculados, incluindo ocorrências recorrentes e parcelas já geradas.
+- Todas as categorias ativas podem ser editadas.
+- Ao excluir uma categoria, os lançamentos existentes são preservados e realocados para a categoria de segurança **Outros**.
+- A categoria **Outros** pode ser renomeada, mas não pode ser excluída nem deixar de aceitar receitas e despesas.
+
+## Teclado e formulários
+
+As telas roláveis e os formulários em modal usam ajuste de teclado e rolagem para o campo focado. O espaço inferior é ampliado enquanto o teclado está aberto para evitar que campos e botões fiquem encobertos no Android e no iOS.

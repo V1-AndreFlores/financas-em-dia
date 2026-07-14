@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import {
-  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   View,
   type ScrollViewProps,
@@ -8,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 import { useAppTheme } from '../theme/AppThemeProvider';
 
 interface AppScreenProps extends PropsWithChildren {
@@ -38,24 +40,37 @@ export function AppScreen({
       edges={['top']}
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
     >
-      {scrollable ? (
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          {...scrollViewProps}
-          contentContainerStyle={contentStyle}
-        >
-          {children}
-        </ScrollView>
-      ) : (
-        <View style={contentStyle}>{children}</View>
-      )}
+      <KeyboardAvoidingView
+        behavior={
+          Platform.OS === 'ios'
+            ? 'padding'
+            : Platform.OS === 'android'
+              ? 'height'
+              : undefined
+        }
+        style={styles.keyboardAvoider}
+      >
+        {scrollable ? (
+          <KeyboardAwareScrollView
+            showsVerticalScrollIndicator={false}
+            {...scrollViewProps}
+            contentContainerStyle={contentStyle}
+          >
+            {children}
+          </KeyboardAwareScrollView>
+        ) : (
+          <View style={contentStyle}>{children}</View>
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
+    flex: 1,
+  },
+  keyboardAvoider: {
     flex: 1,
   },
   content: {

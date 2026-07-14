@@ -4,7 +4,7 @@ const createdAt = '2026-01-01T00:00:00.000Z';
 
 export function createInitialSnapshot(): AppSnapshot {
   return {
-    version: 2,
+    version: 3,
     accounts: [
       {
         id: 'account-main',

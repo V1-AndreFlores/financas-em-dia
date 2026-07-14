@@ -35,9 +35,17 @@ const accountsSlice = createSlice({
         account.updatedAt = new Date().toISOString();
       }
     },
+    accountDeleted(state, action: PayloadAction<string>) {
+      state.items = state.items.filter((item) => item.id !== action.payload);
+    },
   },
 });
 
-export const { accountAdded, accountArchived, accountsReplaced, accountUpdated } =
-  accountsSlice.actions;
+export const {
+  accountAdded,
+  accountArchived,
+  accountDeleted,
+  accountsReplaced,
+  accountUpdated,
+} = accountsSlice.actions;
 export const accountsReducer = accountsSlice.reducer;

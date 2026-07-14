@@ -1,8 +1,10 @@
 import type { Account } from '../../domain/entities/Account';
 import type { AppSnapshot } from '../../domain/entities/AppSnapshot';
+import type { Category, CategoryType } from '../../domain/entities/Category';
 import type { AppLockMode, ThemePreference } from '../../domain/entities/Settings';
 import type {
   FinancialTransaction,
+  RecurringTransactionMetadata,
   RecurrenceFrequency,
   TransactionEntryMode,
   TransactionStatus,
@@ -44,6 +46,10 @@ function isRecurrenceFrequency(value: unknown): value is RecurrenceFrequency {
     value === 'monthly' ||
     value === 'yearly'
   );
+}
+
+function isCategoryType(value: unknown): value is CategoryType {
+  return value === 'expense' || value === 'income' || value === 'both';
 }
 
 function normalizeInteger(
@@ -98,7 +104,45 @@ function normalizeAccounts(value: unknown, defaults: Account[]): Account[] {
     });
 }
 
-function normalizeSeriesMetadata(value: unknown) {
+function normalizeCategories(value: unknown, defaults: Category[]): Category[] {
+  const normalized = Array.isArray(value)
+    ? value.filter(isRecord).flatMap((category) => {
+        if (
+          typeof category.id !== 'string' ||
+          typeof category.name !== 'string' ||
+          !isCategoryType(category.type)
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            id: category.id,
+            name: category.name,
+            type: category.id === 'category-other' ? 'both' : category.type,
+            isDefault: category.isDefault === true,
+            isActive: category.id === 'category-other' ? true : category.isActive !== false,
+            createdAt:
+              typeof category.createdAt === 'string'
+                ? category.createdAt
+                : new Date().toISOString(),
+          } satisfies Category,
+        ];
+      })
+    : [...defaults];
+
+  if (!normalized.some((category) => category.id === 'category-other')) {
+    const fallback = defaults.find((category) => category.id === 'category-other');
+
+    if (fallback) {
+      normalized.push(fallback);
+    }
+  }
+
+  return normalized;
+}
+
+function normalizeInstallmentMetadata(value: unknown) {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -115,6 +159,57 @@ function normalizeSeriesMetadata(value: unknown) {
     groupId: value.groupId,
     current: Math.max(1, Number(value.current)),
     total: Math.max(1, Number(value.total)),
+  };
+}
+
+function normalizeRecurringMetadata(
+  value: unknown,
+  transactionDate: string,
+): RecurringTransactionMetadata | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  if (
+    typeof value.groupId !== 'string' ||
+    !Number.isInteger(value.current) ||
+    !isRecurrenceFrequency(value.frequency)
+  ) {
+    return undefined;
+  }
+
+  const isOpenEnded = value.isOpenEnded === true || value.total === null;
+
+  if (!isOpenEnded && !Number.isInteger(value.total)) {
+    return undefined;
+  }
+
+  const total: number | null = isOpenEnded
+    ? null
+    : Math.max(1, Number(value.total));
+
+  const excludedOccurrences = Array.isArray(value.excludedOccurrences)
+    ? [...new Set(
+        value.excludedOccurrences
+          .filter((item) => Number.isInteger(item) && Number(item) > 0)
+          .map(Number),
+      )].sort((a, b) => a - b)
+    : undefined;
+
+  return {
+    groupId: value.groupId,
+    current: Math.max(1, Number(value.current)),
+    total,
+    frequency: value.frequency,
+    isOpenEnded,
+    seriesStartDate:
+      typeof value.seriesStartDate === 'string'
+        ? value.seriesStartDate
+        : transactionDate,
+    excludedOccurrences:
+      excludedOccurrences && excludedOccurrences.length > 0
+        ? excludedOccurrences
+        : undefined,
   };
 }
 
@@ -137,11 +232,11 @@ function normalizeTransactions(value: unknown): FinancialTransaction[] {
       return [];
     }
 
-    const recurring = normalizeSeriesMetadata(transaction.recurring);
-    const installment = normalizeSeriesMetadata(transaction.installment);
-    const recurringRecord = isRecord(transaction.recurring)
-      ? transaction.recurring
-      : undefined;
+    const recurring = normalizeRecurringMetadata(
+      transaction.recurring,
+      transaction.date,
+    );
+    const installment = normalizeInstallmentMetadata(transaction.installment);
     const now = new Date().toISOString();
 
     return [
@@ -162,12 +257,7 @@ function normalizeTransactions(value: unknown): FinancialTransaction[] {
             : installment
               ? 'installment'
               : 'single',
-        recurring:
-          recurring &&
-          recurringRecord &&
-          isRecurrenceFrequency(recurringRecord.frequency)
-            ? { ...recurring, frequency: recurringRecord.frequency }
-            : undefined,
+        recurring,
         installment,
         createdAt:
           typeof transaction.createdAt === 'string' ? transaction.createdAt : now,
@@ -189,11 +279,9 @@ export function normalizeAppSnapshot(snapshot: unknown): AppSnapshot {
   const persistedSettings = isRecord(snapshot.settings) ? snapshot.settings : {};
 
   return {
-    version: 2,
+    version: 3,
     accounts: normalizeAccounts(snapshot.accounts, defaults.accounts),
-    categories: Array.isArray(snapshot.categories)
-      ? (snapshot.categories as AppSnapshot['categories'])
-      : defaults.categories,
+    categories: normalizeCategories(snapshot.categories, defaults.categories),
     transactions: normalizeTransactions(snapshot.transactions),
     settings: {
       theme:

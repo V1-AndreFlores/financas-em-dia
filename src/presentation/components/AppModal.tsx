@@ -7,7 +7,9 @@ import {
 import {
   Animated,
   Easing,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -118,44 +120,54 @@ export function AppModal({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={
-          dismissOnBackdropPress ? 'Fechar modal' : undefined
-        }
+        accessibilityLabel={dismissOnBackdropPress ? 'Fechar modal' : undefined}
         disabled={!dismissOnBackdropPress}
         onPress={dismissOnBackdropPress ? onRequestClose : undefined}
         style={StyleSheet.absoluteFill}
       />
 
-      <Animated.View
-        accessibilityViewIsModal
-        style={[
-          styles.modalHost,
-          presentation === 'bottom' ? styles.bottomHost : styles.centerHost,
-          {
-            opacity: progress,
-            transform: [{ translateY }, { scale }],
-          },
-        ]}
+      <KeyboardAvoidingView
+        behavior={
+          Platform.OS === 'ios'
+            ? 'padding'
+            : Platform.OS === 'android'
+              ? 'height'
+              : undefined
+        }
+        pointerEvents="box-none"
+        style={styles.keyboardAvoider}
       >
-        <Pressable
-          onPress={() => undefined}
+        <Animated.View
+          accessibilityViewIsModal
           style={[
-            styles.content,
-            presentation === 'bottom'
-              ? styles.bottomContent
-              : styles.centerContent,
+            styles.modalHost,
+            presentation === 'bottom' ? styles.bottomHost : styles.centerHost,
             {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.border,
-              shadowColor: theme.colors.shadow,
-              width: availableWidth,
+              opacity: progress,
+              transform: [{ translateY }, { scale }],
             },
-            contentStyle,
           ]}
         >
-          {children}
-        </Pressable>
-      </Animated.View>
+          <Pressable
+            onPress={() => undefined}
+            style={[
+              styles.content,
+              presentation === 'bottom'
+                ? styles.bottomContent
+                : styles.centerContent,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+                shadowColor: theme.colors.shadow,
+                width: availableWidth,
+              },
+              contentStyle,
+            ]}
+          >
+            {children}
+          </Pressable>
+        </Animated.View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -164,12 +176,11 @@ const styles = StyleSheet.create({
   backdrop: {
     backgroundColor: '#000000',
   },
+  keyboardAvoider: {
+    flex: 1,
+  },
   modalHost: {
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
+    flex: 1,
     paddingHorizontal: 12,
   },
   centerHost: {

@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
 Última atualização: 13/07/2026  
-Versão da referência: 1.1.1
+Versão da referência: 1.1.2
 
 ## 1. Identidade
 
@@ -46,7 +46,7 @@ Persistência por plataforma:
 - Web: `AsyncStorageAppDataRepository`
 - Android/iOS: `SQLiteAppDataRepository`
 
-O snapshot atual possui `version: 2` e contém contas, categorias, lançamentos e ajustes.
+O snapshot atual possui `version: 3` e contém contas, categorias, lançamentos e ajustes.
 
 ## 4. Navegação
 
@@ -71,7 +71,9 @@ As telas Início, Lançamentos e Relatórios compartilham o mesmo deslocamento d
 - O saldo consolidado considera saldos iniciais válidos e lançamentos efetivados até o final do ciclo selecionado.
 - O início do ciclo aceita dias de 1 a 28.
 - A navegação aceita até 120 ciclos anteriores ou futuros.
-- Contas e categorias personalizadas são arquivadas, sem exclusão física pela interface.
+- Contas podem ser excluídas fisicamente; a exclusão remove todos os lançamentos vinculados após confirmação.
+- Categorias podem ser editadas e excluídas; lançamentos vinculados são realocados para `category-other`.
+- `category-other` é a categoria de segurança, permanece ativa, aceita receita e despesa e não pode ser excluída.
 
 ## 6. Saldo inicial
 
@@ -100,17 +102,20 @@ Frequências disponíveis:
 - mensal;
 - anual.
 
-São geradas de 2 a 60 ocorrências. A primeira respeita a situação escolhida; as demais começam pendentes.
+O usuário pode selecionar uma quantidade definida, entre 2 e 60, ou uma recorrência sem término. Séries sem término criam 12 ocorrências iniciais e são ampliadas em lotes ao consultar ciclos além do horizonte já gerado.
 
-Cada ocorrência é uma entidade `FinancialTransaction` própria. Portanto, contas variáveis como luz, água ou condomínio podem ter o valor de cada mês editado separadamente sem alterar as outras ocorrências.
+A primeira ocorrência respeita a situação escolhida; as demais começam pendentes. Cada ocorrência é uma entidade `FinancialTransaction` própria. Portanto, contas variáveis como luz, água ou condomínio podem ter o valor de cada mês editado separadamente sem alterar as outras ocorrências.
 
 Metadados:
 
 - `entryMode: recurring`
 - `recurring.groupId`
 - `recurring.current`
-- `recurring.total`
+- `recurring.total` (`null` para série sem término)
 - `recurring.frequency`
+- `recurring.isOpenEnded`
+- `recurring.seriesStartDate`
+- `recurring.excludedOccurrences` para impedir que ocorrências excluídas sejam recriadas
 
 ### Parcelado
 
@@ -248,7 +253,36 @@ Preferências válidas:
 
 O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valores antigos `system` são convertidos para `light` durante a normalização.
 
-## 16. Arquivos adicionados na versão 1.1.0
+
+## 16. Exclusão de contas e categorias
+
+### Contas
+
+- Todas as contas ativas podem ser excluídas, inclusive as cadastradas inicialmente.
+- A confirmação informa quantos lançamentos estão vinculados.
+- A exclusão remove a conta e todos os lançamentos associados, incluindo parcelas e ocorrências recorrentes já geradas.
+- A remoção dos lançamentos força a ressincronização das notificações locais.
+
+### Categorias
+
+- Todas as categorias ativas podem ser editadas.
+- A categoria `category-other` não pode ser excluída e mantém o tipo `both`.
+- Ao excluir outra categoria, todos os lançamentos vinculados são realocados para `category-other` antes da remoção.
+- A alteração do tipo é bloqueada quando existem lançamentos vinculados de tipo incompatível.
+
+## 17. Teclado e visibilidade dos campos
+
+- `KeyboardAwareScrollView.tsx` centraliza a rolagem para o campo em foco.
+- `FormTextInput` e `MoneyInput` solicitam a exibição do campo acima do teclado.
+- `AppScreen` e `AppModal` usam `KeyboardAvoidingView` com comportamento específico por plataforma.
+- Formulários de conta, categoria, lançamento, filtros e PIN usam rolagem consciente do teclado.
+
+## 18. Arquivos adicionados na versão 1.1.2
+
+- `src/presentation/components/CategoryFormModal.tsx`
+- `src/presentation/components/KeyboardAwareScrollView.tsx`
+
+## 19. Arquivos adicionados na versão 1.1.0
 
 - `src/features/financialPeriod/financialPeriodSlice.ts`
 - `src/infrastructure/notifications/notificationService.native.ts`
@@ -263,7 +297,7 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 - `src/presentation/screens/AppLockScreen.tsx`
 - `src/shared/utils/transactionSeries.ts`
 
-## 17. Dependências nativas adicionadas
+## 20. Dependências nativas adicionadas
 
 - `expo-notifications ~57.0.3`
 - `expo-local-authentication ~57.0.0`
@@ -272,7 +306,7 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 
 Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas exigem novo build EAS.
 
-## 18. Próximos itens planejados
+## 21. Próximos itens planejados
 
 - Cartões de crédito e faturas.
 - Transferências entre contas.
@@ -281,7 +315,7 @@ Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas 
 - Exportação, backup e restauração.
 - Testes automatizados das regras financeiras.
 
-## 19. Regra permanente de entrega
+## 22. Regra permanente de entrega
 
 1. Trabalhar sobre a versão mais recente.
 2. Preservar funcionalidades existentes.

@@ -1,7 +1,9 @@
-import { StyleSheet, TextInput, View } from 'react-native';
+import { useRef } from 'react';
+import { findNodeHandle, StyleSheet, TextInput, View } from 'react-native';
 
 import { currencyInputToCents, formatCurrencyInput } from '../../shared/utils/currency';
 import { AppText } from './AppText';
+import { useKeyboardScrollIntoView } from './KeyboardAwareScrollView';
 import { useAppTheme } from '../theme/AppThemeProvider';
 
 interface MoneyInputProps {
@@ -12,6 +14,8 @@ interface MoneyInputProps {
 
 export function MoneyInput({ label, valueInCents, onChangeValue }: MoneyInputProps) {
   const { theme } = useAppTheme();
+  const inputRef = useRef<TextInput>(null);
+  const scrollToInput = useKeyboardScrollIntoView();
 
   return (
     <View style={styles.container}>
@@ -29,9 +33,11 @@ export function MoneyInput({ label, valueInCents, onChangeValue }: MoneyInputPro
       >
         <AppText style={styles.prefix}>R$</AppText>
         <TextInput
+          ref={inputRef}
           accessibilityLabel={label}
           keyboardType="numeric"
           onChangeText={(value) => onChangeValue(currencyInputToCents(value))}
+          onFocus={() => scrollToInput?.(findNodeHandle(inputRef.current))}
           placeholder="0,00"
           placeholderTextColor={theme.colors.muted}
           selectionColor={theme.colors.primary}

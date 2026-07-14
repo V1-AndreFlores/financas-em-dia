@@ -1,6 +1,14 @@
-import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
+import { useRef } from 'react';
+import {
+  findNodeHandle,
+  StyleSheet,
+  TextInput,
+  View,
+  type TextInputProps,
+} from 'react-native';
 
 import { AppText } from './AppText';
+import { useKeyboardScrollIntoView } from './KeyboardAwareScrollView';
 import { useAppTheme } from '../theme/AppThemeProvider';
 
 export interface FormTextInputProps extends TextInputProps {
@@ -11,10 +19,18 @@ export interface FormTextInputProps extends TextInputProps {
 export function FormTextInput({
   label,
   errorMessage,
+  onFocus,
   style,
   ...props
 }: FormTextInputProps) {
   const { theme } = useAppTheme();
+  const inputRef = useRef<TextInput>(null);
+  const scrollToInput = useKeyboardScrollIntoView();
+
+  const handleFocus: NonNullable<TextInputProps['onFocus']> = (event) => {
+    scrollToInput?.(findNodeHandle(inputRef.current));
+    onFocus?.(event);
+  };
 
   return (
     <View style={styles.container}>
@@ -22,7 +38,9 @@ export function FormTextInput({
         {label}
       </AppText>
       <TextInput
+        ref={inputRef}
         {...props}
+        onFocus={handleFocus}
         placeholderTextColor={theme.colors.muted}
         selectionColor={theme.colors.primary}
         style={[

@@ -31,7 +31,39 @@ const transactionsSlice = createSlice({
       }
     },
     transactionDeleted(state, action: PayloadAction<string>) {
+      const transaction = state.items.find((item) => item.id === action.payload);
+
+      if (transaction?.recurring?.isOpenEnded) {
+        const groupId = transaction.recurring.groupId;
+        const excluded = new Set(transaction.recurring.excludedOccurrences ?? []);
+        excluded.add(transaction.recurring.current);
+        const excludedOccurrences = [...excluded].sort((a, b) => a - b);
+
+        state.items.forEach((item) => {
+          if (item.recurring?.groupId === groupId) {
+            item.recurring.excludedOccurrences = excludedOccurrences;
+            item.updatedAt = new Date().toISOString();
+          }
+        });
+      }
+
       state.items = state.items.filter((item) => item.id !== action.payload);
+    },
+    transactionsDeletedByAccountId(state, action: PayloadAction<string>) {
+      state.items = state.items.filter((item) => item.accountId !== action.payload);
+    },
+    transactionsCategoryReassigned(
+      state,
+      action: PayloadAction<{ fromCategoryId: string; toCategoryId: string }>,
+    ) {
+      const now = new Date().toISOString();
+
+      state.items.forEach((item) => {
+        if (item.categoryId === action.payload.fromCategoryId) {
+          item.categoryId = action.payload.toCategoryId;
+          item.updatedAt = now;
+        }
+      });
     },
     transactionStatusChanged(
       state,
@@ -51,6 +83,8 @@ export const {
   transactionAdded,
   transactionDeleted,
   transactionsAdded,
+  transactionsCategoryReassigned,
+  transactionsDeletedByAccountId,
   transactionsReplaced,
   transactionStatusChanged,
   transactionUpdated,

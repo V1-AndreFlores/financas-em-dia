@@ -9,6 +9,16 @@ export interface TransactionSeriesMetadata {
   total: number;
 }
 
+export interface RecurringTransactionMetadata {
+  groupId: string;
+  current: number;
+  total: number | null;
+  frequency: RecurrenceFrequency;
+  isOpenEnded: boolean;
+  seriesStartDate: string;
+  excludedOccurrences?: number[];
+}
+
 export interface FinancialTransaction {
   id: string;
   type: TransactionType;
@@ -20,9 +30,7 @@ export interface FinancialTransaction {
   status: TransactionStatus;
   notes?: string;
   entryMode?: TransactionEntryMode;
-  recurring?: TransactionSeriesMetadata & {
-    frequency: RecurrenceFrequency;
-  };
+  recurring?: RecurringTransactionMetadata;
   installment?: TransactionSeriesMetadata;
   createdAt: string;
   updatedAt: string;

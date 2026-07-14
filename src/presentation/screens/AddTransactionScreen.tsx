@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../application/store/hooks';
@@ -17,6 +17,7 @@ import {
 } from '../../shared/utils/date';
 import {
   createInstallmentTransactions,
+  createOpenEndedRecurringTransactions,
   createRecurringTransactions,
   createSingleTransaction,
 } from '../../shared/utils/transactionSeries';
@@ -65,6 +66,9 @@ export function AddTransactionScreen() {
   const [notes, setNotes] = useState('');
   const [recurrenceFrequency, setRecurrenceFrequency] =
     useState<RecurrenceFrequency>('monthly');
+  const [recurrenceEndMode, setRecurrenceEndMode] = useState<'unlimited' | 'limited'>(
+    'unlimited',
+  );
   const [occurrenceCount, setOccurrenceCount] = useState('12');
   const [totalInstallments, setTotalInstallments] = useState('10');
   const [startingInstallment, setStartingInstallment] = useState('1');
@@ -78,6 +82,18 @@ export function AddTransactionScreen() {
       ),
     [categories, type],
   );
+
+  useEffect(() => {
+    if (!accounts.some((account) => account.id === accountId)) {
+      setAccountId(accounts[0]?.id ?? '');
+    }
+  }, [accountId, accounts]);
+
+  useEffect(() => {
+    if (!availableCategories.some((category) => category.id === categoryId)) {
+      setCategoryId('');
+    }
+  }, [availableCategories, categoryId]);
 
   const changeType = (nextType: TransactionType) => {
     setType(nextType);
@@ -94,6 +110,7 @@ export function AddTransactionScreen() {
     setStatus('paid');
     setNotes('');
     setRecurrenceFrequency('monthly');
+    setRecurrenceEndMode('unlimited');
     setOccurrenceCount('12');
     setTotalInstallments('10');
     setStartingInstallment('1');
@@ -154,18 +171,29 @@ export function AddTransactionScreen() {
     let generated;
 
     if (entryMode === 'recurring') {
-      const count = Number(occurrenceCount);
+      if (recurrenceEndMode === 'unlimited') {
+        generated = createOpenEndedRecurringTransactions(
+          baseInput,
+          recurrenceFrequency,
+        );
+      } else {
+        const count = Number(occurrenceCount);
 
-      if (!Number.isInteger(count) || count < 2 || count > 60) {
-        setFeedbackDialog({
-          title: 'Quantidade inválida',
-          message: 'Informe de 2 a 60 ocorrências para o lançamento recorrente.',
-          actionTitle: 'Corrigir',
-        });
-        return;
+        if (!Number.isInteger(count) || count < 2 || count > 60) {
+          setFeedbackDialog({
+            title: 'Quantidade inválida',
+            message: 'Informe de 2 a 60 ocorrências para o lançamento recorrente.',
+            actionTitle: 'Corrigir',
+          });
+          return;
+        }
+
+        generated = createRecurringTransactions(
+          baseInput,
+          recurrenceFrequency,
+          count,
+        );
       }
-
-      generated = createRecurringTransactions(baseInput, recurrenceFrequency, count);
     } else if (entryMode === 'installment') {
       const total = Number(totalInstallments);
       const start = Number(startingInstallment);
@@ -200,7 +228,9 @@ export function AddTransactionScreen() {
       entryMode === 'single'
         ? 'O lançamento foi registrado no dispositivo.'
         : entryMode === 'recurring'
-          ? `${generated.length} ocorrências foram criadas. Cada uma pode ser editada separadamente.`
+          ? recurrenceEndMode === 'unlimited'
+            ? `${generated.length} ocorrências iniciais foram criadas. Novas ocorrências serão geradas automaticamente ao avançar para ciclos futuros.`
+            : `${generated.length} ocorrências foram criadas. Cada uma pode ser editada separadamente.`
           : `${generated.length} parcelas foram criadas a partir da parcela ${startingInstallment}/${totalInstallments}.`;
 
     setFeedbackDialog({
@@ -288,14 +318,38 @@ export function AddTransactionScreen() {
                   />
                 ))}
               </View>
-              <FormTextInput
-                label="Quantidade de ocorrências"
-                keyboardType="number-pad"
-                maxLength={2}
-                onChangeText={(value) => setOccurrenceCount(value.replace(/\D/g, ''))}
-                placeholder="12"
-                value={occurrenceCount}
+              <SectionTitle
+                title="Término da recorrência"
+                description="Use sem limite para contas contínuas, como energia, aluguel ou condomínio."
               />
+              <View style={styles.chips}>
+                <FilterChip
+                  label="Sem limite"
+                  selected={recurrenceEndMode === 'unlimited'}
+                  onPress={() => setRecurrenceEndMode('unlimited')}
+                />
+                <FilterChip
+                  label="Quantidade definida"
+                  selected={recurrenceEndMode === 'limited'}
+                  onPress={() => setRecurrenceEndMode('limited')}
+                />
+              </View>
+              {recurrenceEndMode === 'limited' ? (
+                <FormTextInput
+                  label="Quantidade de ocorrências"
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  onChangeText={(value) =>
+                    setOccurrenceCount(value.replace(/\D/g, ''))
+                  }
+                  placeholder="12"
+                  value={occurrenceCount}
+                />
+              ) : (
+                <AppText variant="caption" color="muted" style={styles.help}>
+                  O aplicativo cria as próximas 12 ocorrências e amplia a série automaticamente quando você consultar ciclos futuros.
+                </AppText>
+              )}
             </>
           ) : null}
 

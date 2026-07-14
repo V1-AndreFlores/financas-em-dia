@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import type { Account, AccountType } from '../../domain/entities/Account';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../../shared/utils/date';
 import { createId } from '../../shared/utils/createId';
 import { AppButton } from './AppButton';
+import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 import { AppModal } from './AppModal';
 import { AppText } from './AppText';
 import { DateInput } from './DateInput';
@@ -119,7 +120,7 @@ export function AccountFormModal({
         O saldo inicial representa o valor disponível na data informada.
       </AppText>
 
-      <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
         <FormTextInput
           label="Nome"
           maxLength={60}
@@ -155,7 +156,7 @@ export function AccountFormModal({
           <AppButton title="Salvar conta" onPress={save} fullWidth />
           <AppButton title="Cancelar" variant="ghost" onPress={onRequestClose} fullWidth />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </AppModal>
   );
 }

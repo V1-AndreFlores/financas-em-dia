@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import type { Account } from '../../domain/entities/Account';
 import type { Category } from '../../domain/entities/Category';
@@ -14,6 +14,7 @@ import {
 } from '../../shared/utils/date';
 import type { FinancialPeriod } from '../../shared/utils/financialPeriod';
 import { AppButton } from './AppButton';
+import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 import { AppModal } from './AppModal';
 import { AppText } from './AppText';
 import { DateInput } from './DateInput';
@@ -149,7 +150,7 @@ export function TransactionFiltersModal({
         Combine período, situação, categoria, conta e faixa de valor.
       </AppText>
 
-      <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
         <SectionTitle title="Período" />
         <View style={styles.chips}>
           <FilterChip
@@ -289,7 +290,7 @@ export function TransactionFiltersModal({
           />
           <AppButton title="Cancelar" variant="ghost" onPress={onRequestClose} fullWidth />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </AppModal>
   );
 }
