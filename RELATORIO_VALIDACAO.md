@@ -1,27 +1,53 @@
-# Relatório de Validação — Finanças em Dia 1.1.3
+# Relatório de Validação — Finanças em Dia 1.1.4
 
-Data: 13/07/2026
+Data: 14/07/2026
 
 ## Escopo validado
 
-- Correção da seleção de categorias no cadastro de lançamentos.
-- Seleção automática da primeira categoria compatível quando o formulário não possui uma categoria válida.
-- Alteração manual entre categorias de despesa e receita.
-- Preservação da categoria escolhida após salvar um lançamento.
-- Revalidação da categoria ao trocar o tipo entre despesa e receita.
-- Preservação das funcionalidades da versão 1.1.2.
+- Ajuste da visão financeira da tela Início.
+- Inclusão de lançamentos efetivados e pendentes nos totais de receitas e despesas do ciclo.
+- Cálculo do resultado projetado com todos os lançamentos do período.
+- Separação das pendências em **A receber** e **A pagar**.
+- Remoção do total único e ambíguo de pendências.
+- Preservação do saldo consolidado com somente movimentações efetivadas.
+- Preservação das funcionalidades da versão 1.1.3.
 
-## Causa técnica
+## Regras aplicadas
 
-A tela derivava contas e categorias diretamente em seletores que criavam novos arrays durante as renderizações. Além disso, o formulário limpava a categoria após salvar e o efeito de validação podia deixar o cadastro temporariamente sem seleção.
+### Receitas
 
-A correção passou a:
+Soma todas as receitas do ciclo selecionado, independentemente de estarem efetivadas ou pendentes.
 
-- selecionar as coleções originais do Redux com referências estáveis;
-- derivar contas ativas e categorias compatíveis por `useMemo`;
-- revalidar a seleção com atualização funcional de estado;
-- selecionar automaticamente a primeira categoria compatível quando necessário;
-- manter a categoria e a conta válidas depois de salvar o lançamento.
+### Despesas
+
+Soma todas as despesas do ciclo selecionado, independentemente de estarem efetivadas ou pendentes.
+
+### Resultado do ciclo
+
+Calculado por:
+
+```text
+Receitas previstas - Despesas previstas
+```
+
+### A receber
+
+Soma exclusivamente receitas pendentes do ciclo.
+
+### A pagar
+
+Soma exclusivamente despesas pendentes do ciclo.
+
+### Saldo consolidado
+
+Permanece calculado com saldos iniciais e lançamentos efetivados até o final do ciclo. Dessa forma, representa o dinheiro efetivamente disponível, enquanto os cards do ciclo representam a projeção financeira.
+
+## Ajuste visual
+
+- Foi incluída uma descrição objetiva acima dos cards explicando as regras.
+- O card **Resultado do ciclo** ocupa a largura total.
+- **A receber** usa a identidade visual de receita.
+- **A pagar** usa a identidade visual de despesa.
 
 ## Resultados
 
@@ -29,28 +55,18 @@ A correção passou a:
 - Bundle Web: aprovado.
 - Bundle Android: aprovado.
 - Bundle iOS: aprovado.
-- Configuração pública do Expo: preservada.
 - Nenhuma dependência adicionada.
-- `package-lock.json` mantido sem referências ao registro interno.
+- Nenhuma migração de persistência necessária.
 
-## Teste funcional executado
+## Auditoria de dependências
 
-O bundle Web foi carregado em navegador automatizado com estado local limpo e o seguinte fluxo foi validado:
-
-1. abrir a tela Adicionar;
-2. confirmar a seleção automática de Alimentação;
-3. selecionar Moradia e verificar a mudança visual imediata;
-4. preencher descrição e valor;
-5. salvar o lançamento;
-6. fechar a confirmação;
-7. confirmar que Moradia permanece selecionada;
-8. confirmar que o lançamento salvo utiliza Moradia.
-
-Resultado: aprovado.
+- Nenhuma vulnerabilidade alta ou crítica.
+- Permanecem 10 alertas moderados transitivos do toolchain do Expo.
+- A correção automática com `npm audit fix --force` não foi aplicada porque propõe downgrade incompatível do Expo.
 
 ## Observações
 
-- Não foram adicionados plugins ou dependências nativas.
-- Não é obrigatório executar `npm ci` para aplicar esta atualização incremental.
-- Um novo APK/AAB é necessário apenas para distribuir a versão 1.1.3 instalada.
-- Auditoria npm: nenhuma vulnerabilidade alta ou crítica; permanecem alertas moderados transitivos do toolchain do Expo.
+- Não foram adicionados plugins nem dependências.
+- Não é necessário executar `npm ci` para aplicar o pacote incremental.
+- Não houve alteração no formato do snapshot persistido.
+- Um novo APK/AAB é necessário somente para distribuir a versão 1.1.4 instalada.

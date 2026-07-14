@@ -32,20 +32,26 @@ export function HomeScreen() {
     isDateInPeriod(transaction.date, period),
   );
 
-  const paidTransactions = currentTransactions.filter(
-    (transaction) => transaction.status === 'paid',
-  );
-
-  const income = paidTransactions
+  const income = currentTransactions
     .filter((transaction) => transaction.type === 'income')
     .reduce((total, transaction) => total + transaction.amountInCents, 0);
 
-  const expenses = paidTransactions
+  const expenses = currentTransactions
     .filter((transaction) => transaction.type === 'expense')
     .reduce((total, transaction) => total + transaction.amountInCents, 0);
 
-  const pending = currentTransactions
-    .filter((transaction) => transaction.status === 'pending')
+  const pendingIncome = currentTransactions
+    .filter(
+      (transaction) =>
+        transaction.status === 'pending' && transaction.type === 'income',
+    )
+    .reduce((total, transaction) => total + transaction.amountInCents, 0);
+
+  const pendingExpenses = currentTransactions
+    .filter(
+      (transaction) =>
+        transaction.status === 'pending' && transaction.type === 'expense',
+    )
     .reduce((total, transaction) => total + transaction.amountInCents, 0);
 
   const accountInitialBalance = accounts
@@ -96,6 +102,11 @@ export function HomeScreen() {
         </AppText>
       </AppCard>
 
+      <SectionTitle
+        title="Visão financeira do ciclo"
+        description="Receitas, despesas e resultado incluem valores efetivados e pendentes. A receber e A pagar mostram apenas o que ainda não foi concluído."
+      />
+
       <View style={styles.summaryGrid}>
         <SummaryCard
           label="Receitas"
@@ -114,12 +125,19 @@ export function HomeScreen() {
           value={formatCurrency(income - expenses)}
           type="balance"
           icon="analytics-outline"
+          fullWidth
         />
         <SummaryCard
-          label="Pendências"
-          value={formatCurrency(pending)}
-          type="pending"
-          icon="time-outline"
+          label="A receber"
+          value={formatCurrency(pendingIncome)}
+          type="income"
+          icon="download-outline"
+        />
+        <SummaryCard
+          label="A pagar"
+          value={formatCurrency(pendingExpenses)}
+          type="expense"
+          icon="card-outline"
         />
       </View>
 

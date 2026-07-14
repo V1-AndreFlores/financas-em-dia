@@ -1,6 +1,6 @@
 # Finanças em Dia
 
-Versão atual: **1.1.3**
+Versão atual: **1.1.4**
 
 Aplicativo mobile e web, offline-first, para controle financeiro pessoal. Construído com React Native, Expo e TypeScript.
 
@@ -37,6 +37,9 @@ npm run typecheck
 ## Funcionalidades
 
 - Resumo financeiro por ciclo configurável.
+- Receitas, despesas e resultado do ciclo consideram lançamentos efetivados e pendentes, oferecendo uma visão financeira projetada.
+- Valores pendentes são separados em **A receber** e **A pagar**, evitando a soma ambígua de créditos e débitos.
+- O saldo consolidado continua representando somente saldos iniciais e movimentações efetivadas.
 - Navegação compartilhada entre ciclos anteriores e futuros.
 - Cadastro de receitas e despesas únicas.
 - Lançamentos recorrentes com frequência semanal, quinzenal, mensal ou anual.

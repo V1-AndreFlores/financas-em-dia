@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
-Última atualização: 13/07/2026  
-Versão da referência: 1.1.3
+Última atualização: 14/07/2026  
+Versão da referência: 1.1.4
 
 ## 1. Identidade
 
@@ -67,8 +67,12 @@ As telas Início, Lançamentos e Relatórios compartilham o mesmo deslocamento d
 - Todos os campos de data usam máscara automática e validação de data real.
 - Tipos: receita ou despesa.
 - Situações: efetivado ou pendente.
-- O resultado do ciclo considera somente lançamentos efetivados dentro do período.
-- O saldo consolidado considera saldos iniciais válidos e lançamentos efetivados até o final do ciclo selecionado.
+- Receitas e despesas do ciclo consideram todos os lançamentos do período, independentemente da situação.
+- O resultado do ciclo é projetado pela diferença entre todas as receitas e despesas previstas no período.
+- A situação efetivado/pendente indica apenas se o valor já foi recebido ou pago.
+- Valores ainda pendentes são apresentados separadamente como **A receber** para receitas e **A pagar** para despesas.
+- Não existe mais um total único de pendências, pois somar créditos e débitos causava interpretação ambígua.
+- O saldo consolidado considera saldos iniciais válidos e somente lançamentos efetivados até o final do ciclo selecionado.
 - O início do ciclo aceita dias de 1 a 28.
 - A navegação aceita até 120 ciclos anteriores ou futuros.
 - Contas podem ser excluídas fisicamente; a exclusão remove todos os lançamentos vinculados após confirmação.
@@ -285,12 +289,27 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 - As listas de contas e categorias agora são derivadas de seletores estáveis do Redux, evitando recriações desnecessárias e efeitos que poderiam limpar a seleção.
 - Ao trocar entre despesa e receita, a seleção é revalidada e substituída pela primeira categoria compatível.
 
-## 19. Arquivos adicionados na versão 1.1.2
+
+## 19. Visão financeira do ciclo — versão 1.1.4
+
+Na tela Início:
+
+- **Receitas** soma receitas efetivadas e pendentes do ciclo.
+- **Despesas** soma despesas efetivadas e pendentes do ciclo.
+- **Resultado do ciclo** calcula receitas menos despesas, usando todos os valores previstos.
+- **A receber** soma apenas receitas pendentes.
+- **A pagar** soma apenas despesas pendentes.
+- O antigo card **Pendências** foi removido.
+- **Saldo consolidado** continua usando somente lançamentos efetivados, pois representa o valor realmente disponível.
+
+O card de resultado ocupa a largura total para separar visualmente a projeção principal dos indicadores de valores ainda não concluídos.
+
+## 20. Arquivos adicionados na versão 1.1.2
 
 - `src/presentation/components/CategoryFormModal.tsx`
 - `src/presentation/components/KeyboardAwareScrollView.tsx`
 
-## 20. Arquivos adicionados na versão 1.1.0
+## 21. Arquivos adicionados na versão 1.1.0
 
 - `src/features/financialPeriod/financialPeriodSlice.ts`
 - `src/infrastructure/notifications/notificationService.native.ts`
@@ -305,7 +324,7 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 - `src/presentation/screens/AppLockScreen.tsx`
 - `src/shared/utils/transactionSeries.ts`
 
-## 21. Dependências nativas adicionadas
+## 22. Dependências nativas adicionadas
 
 - `expo-notifications ~57.0.3`
 - `expo-local-authentication ~57.0.0`
@@ -314,7 +333,7 @@ O tema claro é o padrão. A escolha do usuário é persistida no snapshot. Valo
 
 Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas exigem novo build EAS.
 
-## 22. Próximos itens planejados
+## 23. Próximos itens planejados
 
 - Cartões de crédito e faturas.
 - Transferências entre contas.
@@ -323,7 +342,7 @@ Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas 
 - Exportação, backup e restauração.
 - Testes automatizados das regras financeiras.
 
-## 23. Regra permanente de entrega
+## 24. Regra permanente de entrega
 
 1. Trabalhar sobre a versão mais recente.
 2. Preservar funcionalidades existentes.

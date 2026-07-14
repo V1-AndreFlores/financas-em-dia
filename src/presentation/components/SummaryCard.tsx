@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Ionicons, type Ionicons as IoniconsType } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 import { AppCard } from './AppCard';
 import { AppText } from './AppText';
@@ -10,9 +10,16 @@ interface SummaryCardProps {
   value: string;
   type: 'income' | 'expense' | 'balance' | 'pending';
   icon: React.ComponentProps<typeof Ionicons>['name'];
+  fullWidth?: boolean;
 }
 
-export function SummaryCard({ label, value, type, icon }: SummaryCardProps) {
+export function SummaryCard({
+  label,
+  value,
+  type,
+  icon,
+  fullWidth = false,
+}: SummaryCardProps) {
   const { theme } = useAppTheme();
 
   const colorMap = {
@@ -25,7 +32,7 @@ export function SummaryCard({ label, value, type, icon }: SummaryCardProps) {
   const color = colorMap[type];
 
   return (
-    <AppCard style={styles.card}>
+    <AppCard style={[styles.card, fullWidth && styles.fullWidth]}>
       <View style={[styles.iconContainer, { backgroundColor: `${color}18` }]}>
         <Ionicons name={icon} size={22} color={color} />
       </View>
@@ -44,6 +51,9 @@ const styles = StyleSheet.create({
     flexBasis: '48%',
     flexGrow: 1,
     minWidth: 145,
+  },
+  fullWidth: {
+    flexBasis: '100%',
   },
   iconContainer: {
     alignItems: 'center',

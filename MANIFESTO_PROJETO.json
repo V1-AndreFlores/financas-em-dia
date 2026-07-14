@@ -1,7 +1,7 @@
 {
   "project": "Finanças em Dia",
-  "baselineVersion": "1.1.3",
-  "generatedAt": "2026-07-14T02:05:27.092Z",
+  "baselineVersion": "1.1.4",
+  "generatedAt": "2026-07-14T13:10:52.021Z",
   "algorithm": "SHA-256",
   "fileCount": 82,
   "files": [
@@ -13,7 +13,7 @@
     {
       "path": "app.json",
       "size": 1607,
-      "sha256": "8b94a963330ae27d94ee0ea6e593ff8b3af30a1c8cca4b33175d063daab174ef"
+      "sha256": "24918f69480f9652de30f8ddb6af89e01a4abd5c89f2a459a8085e936d962a84"
     },
     {
       "path": "App.tsx",
@@ -68,32 +68,32 @@
     {
       "path": "package-lock.json",
       "size": 254879,
-      "sha256": "e41a87d69eee18d5b3a44818945d241fbc9c21598f79fd6ee1624695ad652eb5"
+      "sha256": "710f16fa2151aa6ec165b852a7f7e450686267a3ea6259190bdeb264a6c87ebb"
     },
     {
       "path": "package.json",
       "size": 1401,
-      "sha256": "208525c0a2305de8dcd26de90ea29afd0951aca41015abe1c03f7461aef836e1"
+      "sha256": "3625fb6cb0611877e935856eb6542662fb7a2b332cbd97057112e712a19b45f2"
     },
     {
       "path": "README.md",
-      "size": 5958,
-      "sha256": "4faa76f22a94740e1086fee11d4f41e62b60051060e8452df3dd12c1c039c579"
+      "size": 6308,
+      "sha256": "ac41e6f2a29b5cc331c5edbf83ab4806952b4b54090a51961573f03620d288f6"
     },
     {
       "path": "Referencia_Projeto_FinancasEmDia.md",
-      "size": 10910,
-      "sha256": "0a22f02c88e2402bc66c348bf1d8f57c9caf9a3da7442f878faa9aa84cdf7da4"
+      "size": 12067,
+      "sha256": "630bdf496cff2c5671af3bf56bf24d90932b2f75fca40ad852cf0df12fa0dc12"
     },
     {
       "path": "RELATORIO_VALIDACAO.md",
-      "size": 2324,
-      "sha256": "dc06eaf1961d5af095aa5e337fd3f7f81c10f69b67974985bfdebb51bee28d13"
+      "size": 2285,
+      "sha256": "45220abb50472ee5c4b21dc1cf941d92dff31320e7b0409a23d2062100971980"
     },
     {
       "path": "scripts/generate-project-manifest.mjs",
       "size": 1575,
-      "sha256": "c7748bf47717bf84560508eebd92d519d316f46a2af6253d2bb8c025434d026c"
+      "sha256": "6ad8426a4006358c69b006643ed4eb1e9ae5807d5488367972ffabe6980fb337"
     },
     {
       "path": "src/application/navigation/AppNavigator.tsx",
@@ -317,8 +317,8 @@
     },
     {
       "path": "src/presentation/components/SummaryCard.tsx",
-      "size": 1457,
-      "sha256": "14dc78773d3e99c9ee860d44c87594aa0f5217dc6fb292e521553b2b7577a70d"
+      "size": 1555,
+      "sha256": "e3e5c526e5dc0d2d28ba1b65fbddb1cb069b519ce501ed4aacb1973874c7ee94"
     },
     {
       "path": "src/presentation/components/TransactionFiltersModal.tsx",
@@ -352,8 +352,8 @@
     },
     {
       "path": "src/presentation/screens/HomeScreen.tsx",
-      "size": 5750,
-      "sha256": "aa3ddbeb4b000f1fdc4622e55f234a606aefa30d3dfae39302701781f2d57193"
+      "size": 6367,
+      "sha256": "82403f7269a5c9e366a6c148037c6c09cdc0db94a1dc41e794f6002706d55cfd"
     },
     {
       "path": "src/presentation/screens/ReportsScreen.tsx",
