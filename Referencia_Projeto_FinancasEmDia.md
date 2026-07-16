@@ -1,7 +1,7 @@
 # Referência do Projeto — Finanças em Dia
 
-Última atualização: 14/07/2026  
-Versão da referência: 1.1.4
+Última atualização: 16/07/2026  
+Versão da referência: 1.1.5
 
 ## 1. Identidade
 
@@ -29,6 +29,7 @@ Versão da referência: 1.1.4
 - Expo Local Authentication
 - Expo Secure Store
 - Expo Crypto
+- Expo Build Properties
 
 ## 3. Arquitetura
 
@@ -304,12 +305,44 @@ Na tela Início:
 
 O card de resultado ocupa a largura total para separar visualmente a projeção principal dos indicadores de valores ainda não concluídos.
 
-## 20. Arquivos adicionados na versão 1.1.2
+## 20. Otimização do build Android — versão 1.1.5
+
+A compilação Android de produção utiliza otimização e ofuscação nativas:
+
+- dependência `expo-build-properties ~57.0.3`;
+- `enableMinifyInReleaseBuilds: true`, ativando o R8 nos builds Android de release;
+- `enableShrinkResourcesInReleaseBuilds: true`, removendo recursos Android não utilizados;
+- geração do arquivo de desofuscação `mapping.txt` no App Bundle de produção;
+- configuração aplicada somente quando `ENABLE_ANDROID_RELEASE_OPTIMIZATION=true`.
+
+A seleção por perfil é feita por configuração dinâmica:
+
+- `app.config.js` adiciona o plugin `expo-build-properties` apenas quando o sinalizador de produção está ativo;
+- `eas.json` define `ENABLE_ANDROID_RELEASE_OPTIMIZATION=true` somente no perfil `production`;
+- os perfis `development` e `preview` permanecem sem R8 e sem redução de recursos;
+- `cli.appVersionSource` permanece como `remote`;
+- `build.production.autoIncrement` permanece como `true`, incrementando automaticamente o `versionCode` Android no próximo build de produção.
+
+A alteração é nativa e exige um novo App Bundle. Antes de publicar, validar o build otimizado em dispositivo físico, com atenção especial a notificações, SQLite, biometria, PIN e inicialização do aplicativo.
+
+Comando de build de produção:
+
+```bash
+eas build -p android --profile production
+```
+
+Comando para consultar a versão Android armazenada remotamente no EAS:
+
+```bash
+eas build:version:get -p android -e production
+```
+
+## 21. Arquivos adicionados na versão 1.1.2
 
 - `src/presentation/components/CategoryFormModal.tsx`
 - `src/presentation/components/KeyboardAwareScrollView.tsx`
 
-## 21. Arquivos adicionados na versão 1.1.0
+## 22. Arquivos adicionados na versão 1.1.0
 
 - `src/features/financialPeriod/financialPeriodSlice.ts`
 - `src/infrastructure/notifications/notificationService.native.ts`
@@ -324,16 +357,17 @@ O card de resultado ocupa a largura total para separar visualmente a projeção 
 - `src/presentation/screens/AppLockScreen.tsx`
 - `src/shared/utils/transactionSeries.ts`
 
-## 22. Dependências nativas adicionadas
+## 23. Dependências nativas adicionadas
 
 - `expo-notifications ~57.0.3`
 - `expo-local-authentication ~57.0.0`
 - `expo-secure-store ~57.0.0`
 - `expo-crypto ~57.0.0`
+- `expo-build-properties ~57.0.3`
 
-Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas exigem novo build EAS.
+Os plugins estáticos correspondentes estão configurados em `app.json`. O `expo-build-properties` é aplicado dinamicamente por `app.config.js` apenas no perfil de produção. Mudanças nativas exigem novo build EAS.
 
-## 23. Próximos itens planejados
+## 24. Próximos itens planejados
 
 - Cartões de crédito e faturas.
 - Transferências entre contas.
@@ -342,7 +376,7 @@ Os plugins correspondentes estão configurados em `app.json`. Mudanças nativas 
 - Exportação, backup e restauração.
 - Testes automatizados das regras financeiras.
 
-## 24. Regra permanente de entrega
+## 25. Regra permanente de entrega
 
 1. Trabalhar sobre a versão mais recente.
 2. Preservar funcionalidades existentes.

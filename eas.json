@@ -12,7 +12,10 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "ENABLE_ANDROID_RELEASE_OPTIMIZATION": "true"
+      }
     }
   },
   "submit": {
